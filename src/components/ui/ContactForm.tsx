@@ -5,6 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 
 const ContactForm: React.FC = () => {
   const { toast } = useToast();
@@ -129,14 +130,14 @@ const ContactForm: React.FC = () => {
         <Label htmlFor="message" className="block text-sm font-medium mb-1">
           Message <span className="text-destructive">*</span>
         </Label>
-        <textarea
+        <Textarea
           id="message"
           name="message"
           value={formData.message}
           onChange={handleChange}
           required
           rows={6}
-          className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary/20 resize-y"
+          className="w-full resize-y"
         />
       </div>
       

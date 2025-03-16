@@ -2,6 +2,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import type { User, Session } from '@supabase/supabase-js';
+import { toast } from 'sonner';
 
 type AuthContextType = {
   user: User | null;
@@ -24,14 +25,24 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (currentSession?.user) {
         setUser(currentSession.user);
         
-        // Check if the user is an admin
-        const { data } = await supabase
-          .from('profiles')
-          .select('is_admin')
-          .eq('id', currentSession.user.id)
-          .single();
-          
-        setIsAdmin(data?.is_admin || false);
+        try {
+          // Check if the user is an admin
+          const { data, error } = await supabase
+            .from('profiles')
+            .select('is_admin')
+            .eq('id', currentSession.user.id)
+            .single();
+            
+          if (error) {
+            console.error("Error fetching profile:", error);
+            setIsAdmin(false);
+          } else {
+            setIsAdmin(data?.is_admin || false);
+          }
+        } catch (error) {
+          console.error("Unexpected error:", error);
+          setIsAdmin(false);
+        }
       } else {
         setUser(null);
         setIsAdmin(false);
@@ -48,7 +59,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
+      (event, session) => {
+        if (event === 'SIGNED_IN') {
+          toast.success("Successfully signed in");
+        } else if (event === 'SIGNED_OUT') {
+          toast.info("You have been signed out");
+        }
+        
         setSession(session);
         setUserData(session);
       }
@@ -60,7 +77,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const signOut = async () => {
-    await supabase.auth.signOut();
+    try {
+      await supabase.auth.signOut();
+    } catch (error) {
+      console.error("Error signing out:", error);
+      toast.error("There was a problem signing out");
+    }
   };
 
   return (

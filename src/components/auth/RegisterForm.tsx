@@ -6,6 +6,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
+import { toast } from 'sonner';
 
 const RegisterForm = () => {
   const [firstName, setFirstName] = useState('');
@@ -14,7 +15,7 @@ const RegisterForm = () => {
   const [password, setPassword] = useState('');
   const [title, setTitle] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const { toast } = useToast();
+  const { toast: uiToast } = useToast();
   const navigate = useNavigate();
 
   const handleRegister = async (e: React.FormEvent) => {
@@ -22,7 +23,12 @@ const RegisterForm = () => {
     setIsLoading(true);
 
     try {
-      const { error } = await supabase.auth.signUp({
+      // Validate password
+      if (password.length < 6) {
+        throw new Error("Password must be at least 6 characters long");
+      }
+      
+      const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
@@ -38,14 +44,23 @@ const RegisterForm = () => {
         throw error;
       }
 
-      toast({
-        title: "Registration successful",
-        description: "Please check your email to confirm your account.",
-      });
+      toast.success("Registration successful");
       
-      navigate('/login');
+      if (data?.user && !data.user.email_confirmed_at) {
+        uiToast({
+          title: "Email confirmation required",
+          description: "Please check your email to confirm your account.",
+        });
+        navigate('/login');
+      } else {
+        navigate('/dashboard');
+      }
     } catch (error: any) {
-      toast({
+      console.error("Registration error:", error);
+      
+      toast.error(error.message || "An error occurred during registration");
+      
+      uiToast({
         title: "Registration failed",
         description: error.message || "An error occurred during registration.",
         variant: "destructive",
@@ -111,6 +126,7 @@ const RegisterForm = () => {
           required
           placeholder="At least 6 characters"
         />
+        <p className="text-xs text-muted-foreground">Password must be at least 6 characters long</p>
       </div>
       
       <Button type="submit" className="w-full" disabled={isLoading}>

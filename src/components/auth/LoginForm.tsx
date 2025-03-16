@@ -1,25 +1,29 @@
 
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
+import { toast } from 'sonner';
+import { Loader2 } from 'lucide-react';
 
 const LoginForm = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const { toast } = useToast();
+  const { toast: uiToast } = useToast();
   const navigate = useNavigate();
+  const location = useLocation();
+  const from = location.state?.from?.pathname || "/dashboard";
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
     try {
-      const { error } = await supabase.auth.signInWithPassword({
+      const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
@@ -28,14 +32,16 @@ const LoginForm = () => {
         throw error;
       }
 
-      toast({
-        title: "Login successful",
-        description: "Welcome back!",
-      });
+      toast.success("Login successful");
       
-      navigate('/dashboard');
+      // Navigate to the page the user was trying to access, or dashboard by default
+      navigate(from, { replace: true });
     } catch (error: any) {
-      toast({
+      console.error("Login error:", error);
+      
+      toast.error(error.message || "Failed to login");
+      
+      uiToast({
         title: "Login failed",
         description: error.message || "Please check your credentials and try again.",
         variant: "destructive",
@@ -56,6 +62,7 @@ const LoginForm = () => {
           onChange={(e) => setEmail(e.target.value)}
           required
           placeholder="professor@university.edu"
+          disabled={isLoading}
         />
       </div>
       
@@ -68,11 +75,19 @@ const LoginForm = () => {
           onChange={(e) => setPassword(e.target.value)}
           required
           placeholder="••••••••"
+          disabled={isLoading}
         />
       </div>
       
       <Button type="submit" className="w-full" disabled={isLoading}>
-        {isLoading ? "Logging in..." : "Login"}
+        {isLoading ? (
+          <>
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            Logging in...
+          </>
+        ) : (
+          "Login"
+        )}
       </Button>
     </form>
   );
