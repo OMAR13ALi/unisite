@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import PageTransition from '@/components/layout/PageTransition';
 import { FileDown } from 'lucide-react';
@@ -9,34 +8,17 @@ const About = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // In a real implementation, this would fetch the actual markdown file
-    import('@/data/about.md')
-      .then(res => {
-        // Since we can't actually import markdown in this setup,
-        // we'll use a raw string that we've stored in the data folder
-        // This is just a simulation of how it would work
-        // @ts-ignore
-        setContent(res.default);
+    // Load markdown content directly with a fetch
+    fetch('/src/data/about.md')
+      .then(response => response.text())
+      .then(text => {
+        setContent(text);
         setIsLoading(false);
       })
       .catch(err => {
-        console.error('Failed to load about content:', err);
-        setIsLoading(false);
-      });
-      
-    // For now, let's manually set the content from our data
-    import('@/data/about.md')
-      .then(module => {
-        fetch(module.default)
-          .then(response => response.text())
-          .then(text => {
-            setContent(text);
-            setIsLoading(false);
-          })
-          .catch(err => {
-            console.error('Failed to fetch markdown:', err);
-            // Fallback content if fetch fails
-            setContent(`
+        console.error('Failed to fetch markdown:', err);
+        // Fallback content if fetch fails
+        setContent(`
 # About Me
 
 I am a Professor of Computer Science at the University of Technology, specializing in artificial intelligence, machine learning, and quantum computing. My research focuses on developing novel computational models and algorithms to solve complex real-world problems.
@@ -73,12 +55,7 @@ I am a Professor of Computer Science at the University of Technology, specializi
 ## Personal
 
 When not engaged in research or teaching, I enjoy hiking, playing chess, and exploring the intersections of technology and art. I am particularly interested in the role of AI in creative processes and the philosophical implications of advanced computational systems.
-            `);
-            setIsLoading(false);
-          });
-      })
-      .catch(err => {
-        console.error('Failed to load about module:', err);
+        `);
         setIsLoading(false);
       });
   }, []);

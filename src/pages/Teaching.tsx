@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import PageTransition from '@/components/layout/PageTransition';
 import ReactMarkdown from 'react-markdown';
@@ -9,19 +8,17 @@ const Teaching = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Similar approach to load markdown content
-    import('@/data/teaching.md')
-      .then(module => {
-        fetch(module.default)
-          .then(response => response.text())
-          .then(text => {
-            setContent(text);
-            setIsLoading(false);
-          })
-          .catch(err => {
-            console.error('Failed to fetch markdown:', err);
-            // Fallback content
-            setContent(`
+    // Load markdown content directly with a fetch
+    fetch('/src/data/teaching.md')
+      .then(response => response.text())
+      .then(text => {
+        setContent(text);
+        setIsLoading(false);
+      })
+      .catch(err => {
+        console.error('Failed to fetch markdown:', err);
+        // Fallback content
+        setContent(`
 # Teaching
 
 I am passionate about education and believe in creating engaging learning environments that foster critical thinking and practical skills. My teaching philosophy emphasizes active learning, real-world applications, and inclusive classroom practices.
@@ -89,12 +86,7 @@ I regularly mentor undergraduate students on research projects. If you are inter
 ### Graduate Advising
 
 I am currently accepting graduate students interested in artificial intelligence, machine learning, quantum computing, and related areas. Prospective students should review my [Research](/research) page and contact me before applying to discuss potential research directions.
-            `);
-            setIsLoading(false);
-          });
-      })
-      .catch(err => {
-        console.error('Failed to load teaching module:', err);
+        `);
         setIsLoading(false);
       });
   }, []);

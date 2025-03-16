@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import PageTransition from '@/components/layout/PageTransition';
 import ReactMarkdown from 'react-markdown';
@@ -8,20 +7,17 @@ const Research = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Similar approach as in About.tsx to load markdown content
-    // In a real implementation, this would fetch the actual markdown file
-    import('@/data/research.md')
-      .then(module => {
-        fetch(module.default)
-          .then(response => response.text())
-          .then(text => {
-            setContent(text);
-            setIsLoading(false);
-          })
-          .catch(err => {
-            console.error('Failed to fetch markdown:', err);
-            // Fallback content
-            setContent(`
+    // Load markdown content directly with a fetch
+    fetch('/src/data/research.md')
+      .then(response => response.text())
+      .then(text => {
+        setContent(text);
+        setIsLoading(false);
+      })
+      .catch(err => {
+        console.error('Failed to fetch markdown:', err);
+        // Fallback content
+        setContent(`
 # Research
 
 My research program focuses on developing novel computational approaches to solve complex problems in artificial intelligence, machine learning, and quantum computing. I lead the Intelligent Systems Laboratory at the University of Technology, where we explore the theoretical foundations and practical applications of these technologies.
@@ -70,12 +66,7 @@ Our research is generously supported by grants from:
 ## Join Our Lab
 
 We are always looking for talented graduate students and postdoctoral researchers to join our lab. If you are interested in our research areas, please visit the [Contact](/contact) page for more information about application procedures.
-            `);
-            setIsLoading(false);
-          });
-      })
-      .catch(err => {
-        console.error('Failed to load research module:', err);
+        `);
         setIsLoading(false);
       });
   }, []);
