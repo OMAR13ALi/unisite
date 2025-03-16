@@ -21,6 +21,7 @@ import Dashboard from "./pages/dashboard/Dashboard";
 import Overview from "./pages/dashboard/Overview";
 import Messages from "./pages/dashboard/Messages";
 import Profile from "./pages/dashboard/Profile";
+import Settings from "./pages/dashboard/Settings";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -59,6 +60,7 @@ const App = () => (
                     <Route index element={<Overview />} />
                     <Route path="messages" element={<Messages />} />
                     <Route path="profile" element={<Profile />} />
+                    <Route path="settings" element={<Settings />} />
                     {/* Additional dashboard routes can be added here */}
                   </Route>
 

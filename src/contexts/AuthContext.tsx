@@ -25,24 +25,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (currentSession?.user) {
         setUser(currentSession.user);
         
-        try {
-          // Check if the user is an admin
-          const { data, error } = await supabase
-            .from('profiles')
-            .select('is_admin')
-            .eq('id', currentSession.user.id)
-            .single();
-            
-          if (error) {
-            console.error("Error fetching profile:", error);
-            setIsAdmin(false);
-          } else {
-            setIsAdmin(data?.is_admin || false);
-          }
-        } catch (error) {
-          console.error("Unexpected error:", error);
-          setIsAdmin(false);
-        }
+        // Set admin status based on email
+        const adminEmail = 'oalia9214@gmail.com';
+        setIsAdmin(currentSession.user.email === adminEmail);
       } else {
         setUser(null);
         setIsAdmin(false);

@@ -1,16 +1,17 @@
 
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { Inbox, FileText, BookOpen, MessageSquare, User } from 'lucide-react';
+import { Inbox, FileText, BookOpen, MessageSquare, User, Settings, Layout, PenTool } from 'lucide-react';
 
 const DashboardNav = () => {
   const links = [
-    { to: "/dashboard", icon: <User size={18} />, label: "Overview", exact: true },
+    { to: "/dashboard", icon: <Layout size={18} />, label: "Overview", exact: true },
     { to: "/dashboard/messages", icon: <Inbox size={18} />, label: "Messages" },
     { to: "/dashboard/research", icon: <FileText size={18} />, label: "Research" },
-    { to: "/dashboard/publications", icon: <FileText size={18} />, label: "Publications" },
+    { to: "/dashboard/publications", icon: <PenTool size={18} />, label: "Publications" },
     { to: "/dashboard/teaching", icon: <BookOpen size={18} />, label: "Teaching" },
-    { to: "/dashboard/profile", icon: <User size={18} />, label: "Profile" }
+    { to: "/dashboard/profile", icon: <User size={18} />, label: "Profile" },
+    { to: "/dashboard/settings", icon: <Settings size={18} />, label: "Settings" }
   ];
   
   return (
