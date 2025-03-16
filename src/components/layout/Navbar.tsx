@@ -2,12 +2,15 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
-import { Menu, X } from 'lucide-react';
+import { Menu, X, LogIn, UserPlus } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
+import { Button } from '../ui/button';
 
 const Navbar: React.FC = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const location = useLocation();
+  const { user, signOut } = useAuth();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -49,22 +52,46 @@ const Navbar: React.FC = () => {
           </Link>
           
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex space-x-8">
-            {navLinks.map((link) => (
-              <Link
-                key={link.path}
-                to={link.path}
-                className={cn(
-                  'hover-underline-animation py-1 font-medium text-sm transition-colors',
-                  location.pathname === link.path 
-                    ? 'text-primary' 
-                    : 'text-muted-foreground hover:text-primary'
-                )}
-              >
-                {link.name}
-              </Link>
-            ))}
-          </nav>
+          <div className="hidden md:flex items-center">
+            <nav className="flex space-x-8 mr-6">
+              {navLinks.map((link) => (
+                <Link
+                  key={link.path}
+                  to={link.path}
+                  className={cn(
+                    'hover-underline-animation py-1 font-medium text-sm transition-colors',
+                    location.pathname === link.path 
+                      ? 'text-primary' 
+                      : 'text-muted-foreground hover:text-primary'
+                  )}
+                >
+                  {link.name}
+                </Link>
+              ))}
+            </nav>
+            
+            {/* Auth Buttons */}
+            {user ? (
+              <Button variant="outline" onClick={signOut} size="sm">
+                Sign Out
+              </Button>
+            ) : (
+              <div className="flex items-center space-x-3">
+                <Link to="/login">
+                  <Button variant="ghost" size="sm" className="flex items-center gap-1">
+                    <LogIn size={16} />
+                    <span>Login</span>
+                  </Button>
+                </Link>
+                <Link to="/register">
+                  <Button size="sm" className="flex items-center gap-1">
+                    <UserPlus size={16} />
+                    <span>Register</span>
+                  </Button>
+                </Link>
+              </div>
+            )}
+          </div>
 
           {/* Mobile Menu Button */}
           <button
@@ -95,6 +122,30 @@ const Navbar: React.FC = () => {
                 {link.name}
               </Link>
             ))}
+            
+            {/* Mobile Auth Buttons */}
+            <div className="flex flex-col space-y-2 mt-4 px-4">
+              {user ? (
+                <Button variant="outline" onClick={signOut} className="w-full">
+                  Sign Out
+                </Button>
+              ) : (
+                <>
+                  <Link to="/login" className="w-full">
+                    <Button variant="outline" className="w-full flex items-center justify-center gap-2">
+                      <LogIn size={16} />
+                      <span>Login</span>
+                    </Button>
+                  </Link>
+                  <Link to="/register" className="w-full">
+                    <Button className="w-full flex items-center justify-center gap-2">
+                      <UserPlus size={16} />
+                      <span>Register</span>
+                    </Button>
+                  </Link>
+                </>
+              )}
+            </div>
           </nav>
         </div>
       )}
