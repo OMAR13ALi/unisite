@@ -25,6 +25,7 @@ import PublicationsManagement from "./pages/dashboard/PublicationsManagement";
 import TeachingManagement from "./pages/dashboard/TeachingManagement";
 import Profile from "./pages/dashboard/Profile";
 import Settings from "./pages/dashboard/Settings";
+import UsersManagement from "./pages/dashboard/UsersManagement";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -65,6 +66,7 @@ const App = () => (
                     <Route path="research" element={<ResearchManagement />} />
                     <Route path="publications" element={<PublicationsManagement />} />
                     <Route path="teaching" element={<TeachingManagement />} />
+                    <Route path="users" element={<UsersManagement />} />
                     <Route path="profile" element={<Profile />} />
                     <Route path="settings" element={<Settings />} />
                   </Route>
