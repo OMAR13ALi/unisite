@@ -73,7 +73,7 @@ const PublicationsManagement = () => {
 
   // Create publication mutation
   const createPublication = useMutation({
-    mutationFn: async (newPublication: Omit<Publication, 'id' | 'created_at'> & { authors: string }) => {
+    mutationFn: async (newPublication: Omit<Publication, 'id' | 'created_at' | 'authors'> & { authors: string }) => {
       // Convert comma-separated authors to array
       const authorArray = newPublication.authors.split(',').map(author => author.trim());
       
@@ -98,7 +98,7 @@ const PublicationsManagement = () => {
 
   // Update publication mutation
   const updatePublication = useMutation({
-    mutationFn: async ({ id, ...publication }: { id: string } & Omit<Publication, 'id' | 'created_at'> & { authors: string }) => {
+    mutationFn: async ({ id, ...publication }: { id: string } & Omit<Publication, 'id' | 'created_at' | 'authors'> & { authors: string }) => {
       // Convert comma-separated authors to array
       const authorArray = publication.authors.split(',').map(author => author.trim());
       
