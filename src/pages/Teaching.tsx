@@ -8,26 +8,31 @@ import { useQuery } from '@tanstack/react-query';
 
 // Function to fetch teaching page content
 const fetchTeachingContent = async () => {
-  const { data, error } = await supabase
-    .from('page_content')
-    .select('content')
-    .eq('page', 'teaching')
-    .maybeSingle();
-  
-  if (error) {
-    console.error('Error fetching teaching content:', error);
-    // Fallback to markdown file if database fetch fails
+  try {
+    const { data, error } = await supabase
+      .from('page_content')
+      .select('content')
+      .eq('page', 'teaching')
+      .maybeSingle();
+    
+    if (error) {
+      console.error('Error fetching teaching content:', error);
+      throw error;
+    }
+    
+    if (!data) {
+      // Fallback to markdown file if no data in database
+      const response = await fetch('/src/data/teaching.md');
+      return { content: await response.text() };
+    }
+    
+    return data;
+  } catch (error) {
+    console.error('Error in fetchTeachingContent:', error);
+    // Fallback to markdown file
     const response = await fetch('/src/data/teaching.md');
     return { content: await response.text() };
   }
-  
-  if (!data) {
-    // Fallback to markdown file if no data in database
-    const response = await fetch('/src/data/teaching.md');
-    return { content: await response.text() };
-  }
-  
-  return data;
 };
 
 // Function to fetch courses from Supabase
@@ -66,7 +71,7 @@ const Teaching = () => {
     term: `${course.semester} ${course.year}`,
     description: course.description,
     syllabus: "#",
-    highlights: course.highlights || [
+    highlights: course.highlights && course.highlights.length > 0 ? course.highlights : [
       "Course materials and resources",
       "Interactive learning activities",
       "Project-based assessments",

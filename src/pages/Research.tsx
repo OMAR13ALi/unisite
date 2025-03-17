@@ -7,26 +7,31 @@ import { useQuery } from '@tanstack/react-query';
 
 // Function to fetch research content from Supabase
 const fetchResearchContent = async () => {
-  const { data, error } = await supabase
-    .from('page_content')
-    .select('content')
-    .eq('page', 'research')
-    .maybeSingle();
-  
-  if (error) {
-    console.error('Error fetching research content:', error);
-    // Fallback to markdown file if database fetch fails
+  try {
+    const { data, error } = await supabase
+      .from('page_content')
+      .select('content')
+      .eq('page', 'research')
+      .maybeSingle();
+    
+    if (error) {
+      console.error('Error fetching research content:', error);
+      throw error;
+    }
+    
+    if (!data) {
+      // Fallback to markdown file if no data in database
+      const response = await fetch('/src/data/research.md');
+      return { content: await response.text() };
+    }
+    
+    return data;
+  } catch (error) {
+    console.error('Error in fetchResearchContent:', error);
+    // Fallback to markdown file
     const response = await fetch('/src/data/research.md');
     return { content: await response.text() };
   }
-  
-  if (!data) {
-    // Fallback to markdown file if no data in database
-    const response = await fetch('/src/data/research.md');
-    return { content: await response.text() };
-  }
-  
-  return data;
 };
 
 // Function to fetch research projects from Supabase
@@ -83,16 +88,19 @@ const Research = () => {
         title: "Quantum Computing",
         image: "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80",
         description: "Exploring quantum algorithms for machine learning and optimization problems.",
+        delay: "0s"
       },
       {
         title: "Ethical AI",
         image: "https://images.unsplash.com/photo-1620712943543-bcc4688e7485?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80",
         description: "Developing frameworks for responsible AI development and deployment.",
+        delay: "0s"
       },
       {
         title: "Distributed Systems",
         image: "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80",
         description: "Building efficient AI models for edge computing and federated learning.",
+        delay: "0s"
       }
     ];
     

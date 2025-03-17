@@ -20,26 +20,31 @@ const fetchProfessorProfile = async () => {
 
 // Function to fetch About page content
 const fetchAboutContent = async () => {
-  const { data, error } = await supabase
-    .from('page_content')
-    .select('content')
-    .eq('page', 'about')
-    .maybeSingle();
-  
-  if (error) {
-    console.error('Error fetching about content:', error);
-    // Fallback to markdown file if database fetch fails
+  try {
+    const { data, error } = await supabase
+      .from('page_content')
+      .select('content')
+      .eq('page', 'about')
+      .maybeSingle();
+    
+    if (error) {
+      console.error('Error fetching about content:', error);
+      throw error;
+    }
+    
+    if (!data) {
+      // Fallback to markdown file if no data in database
+      const response = await fetch('/src/data/about.md');
+      return { content: await response.text() };
+    }
+    
+    return data;
+  } catch (error) {
+    console.error('Error in fetchAboutContent:', error);
+    // Fallback to markdown file
     const response = await fetch('/src/data/about.md');
     return { content: await response.text() };
   }
-  
-  if (!data) {
-    // Fallback to markdown file if no data in database
-    const response = await fetch('/src/data/about.md');
-    return { content: await response.text() };
-  }
-  
-  return data;
 };
 
 const About = () => {

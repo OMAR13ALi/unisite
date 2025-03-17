@@ -14,7 +14,7 @@ import {
 import { useAuth } from '@/contexts/AuthContext';
 
 const DashboardNav = () => {
-  const { user } = useAuth();
+  const { user, isAdmin } = useAuth();
 
   // Define navigation items with permission requirements
   const navItems = [
@@ -79,7 +79,7 @@ const DashboardNav = () => {
   // Filter navigation items based on user permissions
   const filteredNavItems = navItems.filter(item => {
     if (item.requiresAdmin) {
-      return user?.isAdmin;
+      return isAdmin;
     }
     return true;
   });

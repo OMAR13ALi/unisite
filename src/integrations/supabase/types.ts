@@ -55,6 +55,7 @@ export type Database = {
           code: string
           created_at: string
           description: string
+          highlights: string[] | null
           id: string
           semester: string
           status: string
@@ -66,6 +67,7 @@ export type Database = {
           code: string
           created_at?: string
           description: string
+          highlights?: string[] | null
           id?: string
           semester: string
           status?: string
@@ -77,6 +79,7 @@ export type Database = {
           code?: string
           created_at?: string
           description?: string
+          highlights?: string[] | null
           id?: string
           semester?: string
           status?: string
@@ -113,6 +116,30 @@ export type Database = {
           name?: string
           read?: boolean | null
           subject?: string | null
+        }
+        Relationships: []
+      }
+      page_content: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          page: string
+          updated_at: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          page: string
+          updated_at?: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          page?: string
+          updated_at?: string
         }
         Relationships: []
       }
@@ -191,6 +218,7 @@ export type Database = {
           created_at: string
           description: string
           id: string
+          image_url: string | null
           status: string
           title: string
           updated_at: string
@@ -200,6 +228,7 @@ export type Database = {
           created_at?: string
           description: string
           id?: string
+          image_url?: string | null
           status?: string
           title: string
           updated_at?: string
@@ -209,8 +238,36 @@ export type Database = {
           created_at?: string
           description?: string
           id?: string
+          image_url?: string | null
           status?: string
           title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      site_settings: {
+        Row: {
+          created_at: string
+          footer_text: string
+          id: string
+          site_description: string
+          site_title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          footer_text?: string
+          id?: string
+          site_description?: string
+          site_title?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          footer_text?: string
+          id?: string
+          site_description?: string
+          site_title?: string
           updated_at?: string
         }
         Relationships: []

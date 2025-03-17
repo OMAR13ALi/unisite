@@ -11,23 +11,58 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
 // Function to fetch site settings
 const fetchSiteSettings = async () => {
-  const { data, error } = await supabase
-    .from('site_settings')
-    .select('*')
-    .single();
-    
-  if (error) {
-    if (error.code === 'PGRST116') { // Table or view not found
+  try {
+    const { data, error } = await supabase
+      .from('site_settings')
+      .select('*')
+      .maybeSingle();
+      
+    if (error) {
+      console.error('Error fetching site settings:', error);
+      // Default values if table doesn't exist or is empty
       return {
+        id: null,
         site_title: "Prof. Smith",
         site_description: "Academic Website",
         footer_text: "© 2025 Prof. Smith. All rights reserved."
       };
     }
-    throw error;
+    
+    if (!data) {
+      // Create a default record if none exists
+      const { data: newData, error: insertError } = await supabase
+        .from('site_settings')
+        .insert({
+          site_title: "Prof. Smith",
+          site_description: "Academic Website",
+          footer_text: "© 2025 Prof. Smith. All rights reserved."
+        })
+        .select('*')
+        .single();
+        
+      if (insertError) {
+        console.error('Error creating site settings:', insertError);
+        return {
+          id: null,
+          site_title: "Prof. Smith",
+          site_description: "Academic Website",
+          footer_text: "© 2025 Prof. Smith. All rights reserved."
+        };
+      }
+      
+      return newData;
+    }
+    
+    return data;
+  } catch (error) {
+    console.error('Unexpected error in fetchSiteSettings:', error);
+    return {
+      id: null,
+      site_title: "Prof. Smith",
+      site_description: "Academic Website",
+      footer_text: "© 2025 Prof. Smith. All rights reserved."
+    };
   }
-  
-  return data;
 };
 
 const Settings = () => {
@@ -59,7 +94,8 @@ const Settings = () => {
     mutationFn: async (newSettings) => {
       const { data, error } = await supabase
         .from('site_settings')
-        .upsert([newSettings], { onConflict: 'id' });
+        .upsert([newSettings])
+        .select();
         
       if (error) throw error;
       return data;
@@ -81,7 +117,7 @@ const Settings = () => {
     setIsSaving(true);
     
     saveMutation.mutate({
-      id: settings?.id || 1, // Use existing ID or default
+      id: settings?.id || undefined,
       site_title: siteTitle,
       site_description: siteDescription,
       footer_text: footerText,
