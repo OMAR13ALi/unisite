@@ -20,6 +20,9 @@ import Register from "./pages/Register";
 import Dashboard from "./pages/dashboard/Dashboard";
 import Overview from "./pages/dashboard/Overview";
 import Messages from "./pages/dashboard/Messages";
+import ResearchManagement from "./pages/dashboard/ResearchManagement";
+import PublicationsManagement from "./pages/dashboard/PublicationsManagement";
+import TeachingManagement from "./pages/dashboard/TeachingManagement";
 import Profile from "./pages/dashboard/Profile";
 import Settings from "./pages/dashboard/Settings";
 import NotFound from "./pages/NotFound";
@@ -59,9 +62,11 @@ const App = () => (
                   >
                     <Route index element={<Overview />} />
                     <Route path="messages" element={<Messages />} />
+                    <Route path="research" element={<ResearchManagement />} />
+                    <Route path="publications" element={<PublicationsManagement />} />
+                    <Route path="teaching" element={<TeachingManagement />} />
                     <Route path="profile" element={<Profile />} />
                     <Route path="settings" element={<Settings />} />
-                    {/* Additional dashboard routes can be added here */}
                   </Route>
 
                   <Route path="*" element={<NotFound />} />

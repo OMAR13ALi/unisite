@@ -9,6 +9,83 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      course_materials: {
+        Row: {
+          course_id: string
+          created_at: string
+          description: string | null
+          file_path: string
+          id: string
+          title: string
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          course_id: string
+          created_at?: string
+          description?: string | null
+          file_path: string
+          id?: string
+          title: string
+          type: string
+          updated_at?: string
+        }
+        Update: {
+          course_id?: string
+          created_at?: string
+          description?: string | null
+          file_path?: string
+          id?: string
+          title?: string
+          type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "course_materials_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      courses: {
+        Row: {
+          code: string
+          created_at: string
+          description: string
+          id: string
+          semester: string
+          status: string
+          title: string
+          updated_at: string
+          year: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          description: string
+          id?: string
+          semester: string
+          status?: string
+          title: string
+          updated_at?: string
+          year: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          description?: string
+          id?: string
+          semester?: string
+          status?: string
+          title?: string
+          updated_at?: string
+          year?: string
+        }
+        Relationships: []
+      }
       messages: {
         Row: {
           created_at: string
@@ -66,6 +143,75 @@ export type Database = {
           is_admin?: boolean
           last_name?: string
           title?: string
+        }
+        Relationships: []
+      }
+      publications: {
+        Row: {
+          abstract: string
+          authors: string[]
+          created_at: string
+          date: string
+          doi: string | null
+          id: string
+          pdf_url: string | null
+          title: string
+          updated_at: string
+          venue: string
+        }
+        Insert: {
+          abstract: string
+          authors: string[]
+          created_at?: string
+          date: string
+          doi?: string | null
+          id?: string
+          pdf_url?: string | null
+          title: string
+          updated_at?: string
+          venue: string
+        }
+        Update: {
+          abstract?: string
+          authors?: string[]
+          created_at?: string
+          date?: string
+          doi?: string | null
+          id?: string
+          pdf_url?: string | null
+          title?: string
+          updated_at?: string
+          venue?: string
+        }
+        Relationships: []
+      }
+      research_projects: {
+        Row: {
+          category: string
+          created_at: string
+          description: string
+          id: string
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          description: string
+          id?: string
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          description?: string
+          id?: string
+          status?: string
+          title?: string
+          updated_at?: string
         }
         Relationships: []
       }
