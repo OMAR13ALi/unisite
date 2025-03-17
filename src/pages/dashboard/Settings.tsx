@@ -1,28 +1,105 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+
+// Function to fetch site settings
+const fetchSiteSettings = async () => {
+  const { data, error } = await supabase
+    .from('site_settings')
+    .select('*')
+    .single();
+    
+  if (error) {
+    if (error.code === 'PGRST116') { // Table or view not found
+      return {
+        site_title: "Prof. Smith",
+        site_description: "Academic Website",
+        footer_text: "© 2025 Prof. Smith. All rights reserved."
+      };
+    }
+    throw error;
+  }
+  
+  return data;
+};
 
 const Settings = () => {
   const { user } = useAuth();
-  const [siteTitle, setSiteTitle] = useState("Prof. Smith");
-  const [siteDescription, setSiteDescription] = useState("Academic Website");
-  const [footerText, setFooterText] = useState("© 2025 Prof. Smith. All rights reserved.");
+  const queryClient = useQueryClient();
   const [isSaving, setIsSaving] = useState(false);
+  
+  // Use React Query to fetch site settings
+  const { data: settings, isLoading } = useQuery({
+    queryKey: ['siteSettings'],
+    queryFn: fetchSiteSettings
+  });
+  
+  const [siteTitle, setSiteTitle] = useState('');
+  const [siteDescription, setSiteDescription] = useState('');
+  const [footerText, setFooterText] = useState('');
+  
+  // Update state when settings are loaded
+  useEffect(() => {
+    if (settings) {
+      setSiteTitle(settings.site_title || "Prof. Smith");
+      setSiteDescription(settings.site_description || "Academic Website");
+      setFooterText(settings.footer_text || "© 2025 Prof. Smith. All rights reserved.");
+    }
+  }, [settings]);
+  
+  // Mutation to save settings
+  const saveMutation = useMutation({
+    mutationFn: async (newSettings) => {
+      const { data, error } = await supabase
+        .from('site_settings')
+        .upsert([newSettings], { onConflict: 'id' });
+        
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['siteSettings'] });
+      toast.success("Settings saved successfully");
+    },
+    onError: (error) => {
+      console.error('Error saving settings:', error);
+      toast.error("Failed to save settings");
+    },
+    onSettled: () => {
+      setIsSaving(false);
+    }
+  });
   
   const handleSaveSettings = () => {
     setIsSaving(true);
     
-    // Simulate saving settings
-    setTimeout(() => {
-      setIsSaving(false);
-      toast.success("Settings saved successfully");
-    }, 1000);
+    saveMutation.mutate({
+      id: settings?.id || 1, // Use existing ID or default
+      site_title: siteTitle,
+      site_description: siteDescription,
+      footer_text: footerText,
+      updated_at: new Date().toISOString()
+    });
   };
+  
+  if (isLoading) {
+    return (
+      <div className="animate-pulse space-y-6">
+        <div className="h-8 bg-muted rounded w-64"></div>
+        <div className="h-10 bg-muted rounded w-full"></div>
+        <div className="h-10 bg-muted rounded w-full"></div>
+        <div className="h-32 bg-muted rounded w-full"></div>
+        <div className="h-10 bg-muted rounded w-32"></div>
+      </div>
+    );
+  }
   
   return (
     <div>
@@ -33,7 +110,7 @@ const Settings = () => {
           <Label htmlFor="admin-email">Admin Email</Label>
           <Input 
             id="admin-email" 
-            value={user?.email || 'oalia9214@gmail.com'} 
+            value={user?.email || 'admin@example.com'} 
             disabled 
             className="bg-muted"
           />

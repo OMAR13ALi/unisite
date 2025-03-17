@@ -1,29 +1,32 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import PageTransition from '@/components/layout/PageTransition';
 import PublicationCard, { Publication } from '@/components/ui/PublicationCard';
 import { Search } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { useQuery } from '@tanstack/react-query';
+
+// Function to fetch publications from Supabase
+const fetchPublications = async () => {
+  const { data, error } = await supabase
+    .from('publications')
+    .select('*')
+    .order('date', { ascending: false });
+  
+  if (error) throw error;
+  return data as Publication[];
+};
 
 const Publications = () => {
-  const [publications, setPublications] = useState<Publication[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [yearFilter, setYearFilter] = useState<string>('');
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
   
-  useEffect(() => {
-    // Fetch publications data
-    // In a real implementation, this would be loaded from the JSON file
-    import('@/data/publications.json')
-      .then(data => {
-        setPublications(data.default);
-        setIsLoading(false);
-      })
-      .catch(error => {
-        console.error('Error loading publications:', error);
-        setIsLoading(false);
-      });
-  }, []);
+  // Fetch publications using React Query
+  const { data: publications = [], isLoading } = useQuery({
+    queryKey: ['publications'],
+    queryFn: fetchPublications
+  });
   
   const toggleExpand = (id: string) => {
     setExpandedIds(prev => {

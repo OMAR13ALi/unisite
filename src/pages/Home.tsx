@@ -3,8 +3,180 @@ import React from 'react';
 import PageTransition from '@/components/layout/PageTransition';
 import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { useQuery } from '@tanstack/react-query';
+
+// Function to fetch professor profile
+const fetchProfessorProfile = async () => {
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('*')
+    .eq('is_admin', true)
+    .single();
+  
+  if (error) {
+    console.error('Error fetching professor profile:', error);
+    return {
+      first_name: 'John',
+      last_name: 'Smith',
+      title: 'Professor of Computer Science'
+    };
+  }
+  
+  return data;
+};
+
+// Function to fetch recent publications
+const fetchRecentPublications = async () => {
+  const { data, error } = await supabase
+    .from('publications')
+    .select('*')
+    .order('date', { ascending: false })
+    .limit(3);
+  
+  if (error) throw error;
+  return data || [];
+};
+
+// Function to fetch active courses
+const fetchActiveCourses = async () => {
+  const { data, error } = await supabase
+    .from('courses')
+    .select('*')
+    .eq('status', 'active')
+    .order('code', { ascending: true })
+    .limit(3);
+  
+  if (error) throw error;
+  return data || [];
+};
+
+// Function to fetch research highlights
+const fetchResearchHighlights = async () => {
+  const { data, error } = await supabase
+    .from('research_projects')
+    .select('*')
+    .eq('status', 'active')
+    .order('created_at', { ascending: false })
+    .limit(3);
+  
+  if (error) throw error;
+  return data || [];
+};
 
 const Home = () => {
+  // Fetch data using React Query
+  const { data: professor } = useQuery({
+    queryKey: ['professorProfile'],
+    queryFn: fetchProfessorProfile
+  });
+
+  const { data: publications = [] } = useQuery({
+    queryKey: ['recentPublications'],
+    queryFn: fetchRecentPublications
+  });
+
+  const { data: courses = [] } = useQuery({
+    queryKey: ['activeCourses'],
+    queryFn: fetchActiveCourses
+  });
+
+  const { data: researchProjects = [] } = useQuery({
+    queryKey: ['researchHighlights'],
+    queryFn: fetchResearchHighlights
+  });
+
+  // Format research areas for display
+  const researchAreas = researchProjects.length > 0 
+    ? researchProjects.map((project, index) => ({
+        title: project.title,
+        description: project.description.substring(0, 100) + (project.description.length > 100 ? '...' : ''),
+        delay: `${index * 0.2}s`
+      }))
+    : [
+        {
+          title: "Quantum Computing",
+          description: "Developing quantum algorithms for machine learning and optimization problems.",
+          delay: "0s"
+        },
+        {
+          title: "Ethical AI",
+          description: "Creating frameworks for responsible AI development and deployment.",
+          delay: "0.2s"
+        },
+        {
+          title: "Distributed Systems",
+          description: "Building efficient AI models for edge computing and federated learning.",
+          delay: "0.4s"
+        }
+      ];
+
+  // Format courses for display
+  const displayCourses = courses.length > 0
+    ? courses.map((course, index) => ({
+        code: course.code,
+        title: course.title,
+        term: `${course.semester} ${course.year}`,
+        description: course.description.substring(0, 100) + (course.description.length > 100 ? '...' : ''),
+        delay: `${index * 0.2}s`
+      }))
+    : [
+        {
+          code: "CS 401",
+          title: "Advanced Artificial Intelligence",
+          term: "Fall 2023",
+          description: "Graduate-level course exploring cutting-edge topics in AI.",
+          delay: "0s"
+        },
+        {
+          code: "CS 301",
+          title: "Machine Learning",
+          term: "Fall 2023",
+          description: "Undergraduate introduction to machine learning algorithms and applications.",
+          delay: "0.2s"
+        },
+        {
+          code: "CS 201",
+          title: "Data Structures and Algorithms",
+          term: "Spring 2024",
+          description: "Core undergraduate course on essential programming fundamentals.",
+          delay: "0.4s"
+        }
+      ];
+
+  // Format publications for display
+  const recentPublications = publications.length > 0
+    ? publications.map((pub, index) => ({
+        title: pub.title,
+        authors: Array.isArray(pub.authors) ? pub.authors.join(', ') : pub.authors,
+        venue: pub.venue,
+        year: pub.date,
+        delay: `${index * 0.2}s`
+      }))
+    : [
+        {
+          title: "Quantum Computing Approaches for Complex Optimization Problems",
+          authors: "John Smith, Emily Chen, David Johnson",
+          venue: "IEEE Transactions on Quantum Computing",
+          year: "2023",
+          delay: "0s"
+        },
+        {
+          title: "Machine Learning Techniques for Large-Scale Distributed Systems",
+          authors: "Sarah Wong, John Smith, Michael Brown",
+          venue: "ACM Computing Surveys",
+          year: "2022",
+          delay: "0.2s"
+        },
+        {
+          title: "Ethical Considerations in Artificial Intelligence Research",
+          authors: "John Smith, Alexandra Martinez",
+          venue: "Journal of AI Ethics",
+          year: "2022",
+          delay: "0.4s"
+        }
+      ];
+
   return (
     <PageTransition>
       <div className="pt-20">
@@ -18,11 +190,11 @@ const Home = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
               <div className="order-2 md:order-1 animate-slide-up" style={{ animationDelay: '0.2s' }}>
                 <h1 className="font-serif text-5xl md:text-6xl lg:text-7xl font-medium mb-6">
-                  Prof. John Smith
+                  {professor ? `${professor.first_name} ${professor.last_name}` : 'Prof. John Smith'}
                 </h1>
                 <div className="h-1 w-20 bg-primary mb-6"></div>
                 <h2 className="text-xl md:text-2xl text-muted-foreground mb-8">
-                  Professor of Computer Science<br />
+                  {professor?.title || 'Professor of Computer Science'}<br />
                   University of Technology
                 </h2>
                 <p className="text-lg md:text-xl mb-8 max-w-lg">
@@ -50,7 +222,7 @@ const Home = () => {
                   <div className="absolute -inset-1 bg-gradient-to-tr from-primary/20 to-secondary/40 rounded-2xl blur-md"></div>
                   <img 
                     src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=774&q=80" 
-                    alt="Professor John Smith" 
+                    alt={professor ? `Professor ${professor.first_name} ${professor.last_name}` : "Professor John Smith"} 
                     className="w-full max-w-md rounded-xl object-cover relative z-10"
                   />
                 </div>
@@ -66,23 +238,7 @@ const Home = () => {
               Research Highlights
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              {[
-                {
-                  title: "Quantum Computing",
-                  description: "Developing quantum algorithms for machine learning and optimization problems.",
-                  delay: "0s"
-                },
-                {
-                  title: "Ethical AI",
-                  description: "Creating frameworks for responsible AI development and deployment.",
-                  delay: "0.2s"
-                },
-                {
-                  title: "Distributed Systems",
-                  description: "Building efficient AI models for edge computing and federated learning.",
-                  delay: "0.4s"
-                }
-              ].map((item, index) => (
+              {researchAreas.map((item, index) => (
                 <div 
                   key={index}
                   className="bg-white p-8 rounded-lg border animate-slide-up shadow-sm"
@@ -113,29 +269,7 @@ const Home = () => {
               My latest contributions to academic research in artificial intelligence and computer science.
             </p>
             <div className="max-w-4xl mx-auto space-y-6">
-              {[
-                {
-                  title: "Quantum Computing Approaches for Complex Optimization Problems",
-                  authors: "John Smith, Emily Chen, David Johnson",
-                  venue: "IEEE Transactions on Quantum Computing",
-                  year: "2023",
-                  delay: "0s"
-                },
-                {
-                  title: "Machine Learning Techniques for Large-Scale Distributed Systems",
-                  authors: "Sarah Wong, John Smith, Michael Brown",
-                  venue: "ACM Computing Surveys",
-                  year: "2022",
-                  delay: "0.2s"
-                },
-                {
-                  title: "Ethical Considerations in Artificial Intelligence Research",
-                  authors: "John Smith, Alexandra Martinez",
-                  venue: "Journal of AI Ethics",
-                  year: "2022",
-                  delay: "0.4s"
-                }
-              ].map((pub, index) => (
+              {recentPublications.map((pub, index) => (
                 <div 
                   key={index} 
                   className="p-6 border rounded-md bg-white animate-slide-up shadow-sm"
@@ -170,29 +304,7 @@ const Home = () => {
               Current Courses
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {[
-                {
-                  code: "CS 401",
-                  title: "Advanced Artificial Intelligence",
-                  term: "Fall 2023",
-                  description: "Graduate-level course exploring cutting-edge topics in AI.",
-                  delay: "0s"
-                },
-                {
-                  code: "CS 301",
-                  title: "Machine Learning",
-                  term: "Fall 2023",
-                  description: "Undergraduate introduction to machine learning algorithms and applications.",
-                  delay: "0.2s"
-                },
-                {
-                  code: "CS 201",
-                  title: "Data Structures and Algorithms",
-                  term: "Spring 2024",
-                  description: "Core undergraduate course on essential programming fundamentals.",
-                  delay: "0.4s"
-                }
-              ].map((course, index) => (
+              {displayCourses.map((course, index) => (
                 <div 
                   key={index} 
                   className="bg-white p-8 rounded-lg border animate-slide-up shadow-sm"

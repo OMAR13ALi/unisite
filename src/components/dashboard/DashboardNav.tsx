@@ -11,62 +11,82 @@ import {
   Settings,
   Users
 } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
 
 const DashboardNav = () => {
-  const links = [
+  const { user } = useAuth();
+
+  // Define navigation items with permission requirements
+  const navItems = [
     { 
       to: '/dashboard', 
       label: 'Overview', 
       icon: <LayoutDashboard size={18} className="mr-2" />,
-      exact: true
+      exact: true,
+      requiresAdmin: false
     },
     { 
       to: '/dashboard/messages', 
       label: 'Messages', 
       icon: <MessageSquare size={18} className="mr-2" />,
-      exact: false
+      exact: false,
+      requiresAdmin: true
     },
     { 
       to: '/dashboard/research', 
       label: 'Research', 
       icon: <BookOpen size={18} className="mr-2" />,
-      exact: false
+      exact: false,
+      requiresAdmin: true
     },
     { 
       to: '/dashboard/publications', 
       label: 'Publications', 
       icon: <FileText size={18} className="mr-2" />,
-      exact: false
+      exact: false,
+      requiresAdmin: true
     },
     { 
       to: '/dashboard/teaching', 
       label: 'Teaching', 
       icon: <GraduationCap size={18} className="mr-2" />,
-      exact: false
+      exact: false,
+      requiresAdmin: true
     },
     { 
       to: '/dashboard/users', 
       label: 'Users', 
       icon: <Users size={18} className="mr-2" />,
-      exact: false
+      exact: false,
+      requiresAdmin: true
     },
     { 
       to: '/dashboard/profile', 
       label: 'Profile', 
       icon: <User size={18} className="mr-2" />,
-      exact: false
+      exact: false,
+      requiresAdmin: false
     },
     { 
       to: '/dashboard/settings', 
       label: 'Settings', 
       icon: <Settings size={18} className="mr-2" />,
-      exact: false
+      exact: false,
+      requiresAdmin: true
     },
   ];
   
+  // Filter navigation items based on user permissions
+  const filteredNavItems = navItems.filter(item => {
+    if (item.requiresAdmin) {
+      return user?.isAdmin;
+    }
+    return true;
+  });
+
   return (
     <nav className="space-y-1">
-      {links.map((link) => (
+      {filteredNavItems.map((link) => (
         <NavLink
           key={link.to}
           to={link.to}

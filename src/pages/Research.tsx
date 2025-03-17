@@ -1,75 +1,103 @@
+
 import React, { useEffect, useState } from 'react';
 import PageTransition from '@/components/layout/PageTransition';
 import ReactMarkdown from 'react-markdown';
+import { supabase } from '@/integrations/supabase/client';
+import { useQuery } from '@tanstack/react-query';
+
+// Function to fetch research content from Supabase
+const fetchResearchContent = async () => {
+  const { data, error } = await supabase
+    .from('page_content')
+    .select('content')
+    .eq('page', 'research')
+    .maybeSingle();
+  
+  if (error) {
+    console.error('Error fetching research content:', error);
+    // Fallback to markdown file if database fetch fails
+    const response = await fetch('/src/data/research.md');
+    return { content: await response.text() };
+  }
+  
+  if (!data) {
+    // Fallback to markdown file if no data in database
+    const response = await fetch('/src/data/research.md');
+    return { content: await response.text() };
+  }
+  
+  return data;
+};
+
+// Function to fetch research projects from Supabase
+const fetchResearchProjects = async () => {
+  const { data, error } = await supabase
+    .from('research_projects')
+    .select('*')
+    .eq('status', 'active')
+    .order('created_at', { ascending: false });
+  
+  if (error) throw error;
+  return data || [];
+};
 
 const Research = () => {
-  const [content, setContent] = useState('');
-  const [isLoading, setIsLoading] = useState(true);
+  // Fetch research content using React Query
+  const { data: contentData, isLoading: isLoadingContent } = useQuery({
+    queryKey: ['researchContent'],
+    queryFn: fetchResearchContent
+  });
 
-  useEffect(() => {
-    // Load markdown content directly with a fetch
-    fetch('/src/data/research.md')
-      .then(response => response.text())
-      .then(text => {
-        setContent(text);
-        setIsLoading(false);
-      })
-      .catch(err => {
-        console.error('Failed to fetch markdown:', err);
-        // Fallback content
-        setContent(`
-# Research
+  // Fetch research projects using React Query
+  const { data: projects = [], isLoading: isLoadingProjects } = useQuery({
+    queryKey: ['researchProjects'],
+    queryFn: fetchResearchProjects
+  });
+  
+  const isLoading = isLoadingContent || isLoadingProjects;
+  const content = contentData?.content || '';
 
-My research program focuses on developing novel computational approaches to solve complex problems in artificial intelligence, machine learning, and quantum computing. I lead the Intelligent Systems Laboratory at the University of Technology, where we explore the theoretical foundations and practical applications of these technologies.
+  // Map projects to research areas for visualization
+  const researchAreas = projects.slice(0, 3).map(project => ({
+    title: project.title,
+    description: project.description.substring(0, 100) + (project.description.length > 100 ? '...' : ''),
+    image: project.image_url || getDefaultImageForCategory(project.category),
+    delay: "0s"
+  }));
 
-## Current Research Areas
+  // Default images based on research category
+  function getDefaultImageForCategory(category) {
+    const defaultImages = {
+      "quantum": "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80",
+      "ai": "https://images.unsplash.com/photo-1620712943543-bcc4688e7485?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80",
+      "distributed": "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80"
+    };
+    
+    return defaultImages[category.toLowerCase()] || "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80";
+  }
 
-### Quantum Machine Learning
-
-We are developing new algorithms that leverage quantum computing principles to enhance machine learning capabilities. Our recent work focuses on quantum neural networks and quantum-enhanced optimization for training deep learning models. Key projects include:
-
-- **Quantum Variational Autoencoders**: Developing quantum versions of variational autoencoders that can process high-dimensional data more efficiently than classical counterparts.
-- **Quantum Reinforcement Learning**: Exploring how quantum algorithms can accelerate reinforcement learning tasks in complex environments.
-
-### Ethical AI and Fairness
-
-My lab is deeply committed to addressing the ethical challenges in AI development and deployment. We are working on:
-
-- **Interpretable AI Systems**: Building models that provide transparent explanations for their decisions and recommendations.
-- **Algorithmic Fairness**: Developing techniques to detect and mitigate bias in machine learning systems, with a focus on applications in healthcare and criminal justice.
-- **Privacy-Preserving Machine Learning**: Creating methods for training models on sensitive data while preserving individual privacy.
-
-### Distributed AI Systems
-
-We are pioneering approaches for deploying AI in distributed environments:
-
-- **Federated Learning at Scale**: Enhancing federated learning techniques to work effectively across heterogeneous devices and networks.
-- **Edge AI Optimization**: Developing lightweight models and optimization techniques for AI deployment on edge devices with limited computational resources.
-
-## Research Collaborations
-
-Our lab collaborates with various academic institutions and industry partners, including:
-
-- **QuantumTech Research Initiative**: A multi-university collaboration exploring quantum computing applications.
-- **Healthcare AI Consortium**: Working with medical institutions to develop ethical AI solutions for healthcare challenges.
-- **Industry Partners**: Collaborations with technology companies to bridge theoretical research and practical applications.
-
-## Funding
-
-Our research is generously supported by grants from:
-
-- National Science Foundation (NSF)
-- Department of Energy (DOE)
-- National Institutes of Health (NIH)
-- Industry partnerships and university research grants
-
-## Join Our Lab
-
-We are always looking for talented graduate students and postdoctoral researchers to join our lab. If you are interested in our research areas, please visit the [Contact](/contact) page for more information about application procedures.
-        `);
-        setIsLoading(false);
-      });
-  }, []);
+  // If there are fewer than 3 projects, add defaults
+  while (researchAreas.length < 3) {
+    const defaults = [
+      {
+        title: "Quantum Computing",
+        image: "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80",
+        description: "Exploring quantum algorithms for machine learning and optimization problems.",
+      },
+      {
+        title: "Ethical AI",
+        image: "https://images.unsplash.com/photo-1620712943543-bcc4688e7485?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80",
+        description: "Developing frameworks for responsible AI development and deployment.",
+      },
+      {
+        title: "Distributed Systems",
+        image: "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80",
+        description: "Building efficient AI models for edge computing and federated learning.",
+      }
+    ];
+    
+    researchAreas.push(defaults[researchAreas.length % 3]);
+  }
 
   return (
     <PageTransition>
@@ -107,30 +135,11 @@ We are always looking for talented graduate students and postdoctoral researcher
           {/* Research Areas Visualization */}
           <div className="max-w-5xl mx-auto mt-16">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              {[
-                {
-                  title: "Quantum Computing",
-                  image: "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80",
-                  description: "Exploring quantum algorithms for machine learning and optimization problems.",
-                  delay: "0s"
-                },
-                {
-                  title: "Ethical AI",
-                  image: "https://images.unsplash.com/photo-1620712943543-bcc4688e7485?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80",
-                  description: "Developing frameworks for responsible AI development and deployment.",
-                  delay: "0.2s"
-                },
-                {
-                  title: "Distributed Systems",
-                  image: "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80",
-                  description: "Building efficient AI models for edge computing and federated learning.",
-                  delay: "0.4s"
-                }
-              ].map((area, index) => (
+              {researchAreas.map((area, index) => (
                 <div 
                   key={index} 
                   className="bg-white rounded-lg overflow-hidden border shadow-sm animate-slide-up"
-                  style={{ animationDelay: area.delay }}
+                  style={{ animationDelay: `${index * 0.2}s` }}
                 >
                   <div className="h-48 overflow-hidden">
                     <img 

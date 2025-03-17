@@ -1,64 +1,62 @@
+
 import React, { useEffect, useState } from 'react';
 import PageTransition from '@/components/layout/PageTransition';
 import { FileDown } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
+import { supabase } from '@/integrations/supabase/client';
+import { useQuery } from '@tanstack/react-query';
+
+// Function to fetch professor profile
+const fetchProfessorProfile = async () => {
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('*')
+    .eq('is_admin', true)
+    .single();
+  
+  if (error) throw error;
+  return data;
+};
+
+// Function to fetch About page content
+const fetchAboutContent = async () => {
+  const { data, error } = await supabase
+    .from('page_content')
+    .select('content')
+    .eq('page', 'about')
+    .maybeSingle();
+  
+  if (error) {
+    console.error('Error fetching about content:', error);
+    // Fallback to markdown file if database fetch fails
+    const response = await fetch('/src/data/about.md');
+    return { content: await response.text() };
+  }
+  
+  if (!data) {
+    // Fallback to markdown file if no data in database
+    const response = await fetch('/src/data/about.md');
+    return { content: await response.text() };
+  }
+  
+  return data;
+};
 
 const About = () => {
-  const [content, setContent] = useState('');
-  const [isLoading, setIsLoading] = useState(true);
+  // Use React Query to fetch professor profile
+  const { data: professor, isLoading: isLoadingProfile } = useQuery({
+    queryKey: ['professorProfile'],
+    queryFn: fetchProfessorProfile
+  });
 
-  useEffect(() => {
-    // Load markdown content directly with a fetch
-    fetch('/src/data/about.md')
-      .then(response => response.text())
-      .then(text => {
-        setContent(text);
-        setIsLoading(false);
-      })
-      .catch(err => {
-        console.error('Failed to fetch markdown:', err);
-        // Fallback content if fetch fails
-        setContent(`
-# About Me
-
-I am a Professor of Computer Science at the University of Technology, specializing in artificial intelligence, machine learning, and quantum computing. My research focuses on developing novel computational models and algorithms to solve complex real-world problems.
-
-## Education
-
-- **Ph.D. in Computer Science**, Stanford University, 2010
-- **M.S. in Computer Science**, Massachusetts Institute of Technology, 2006
-- **B.S. in Mathematics and Computer Science**, University of California, Berkeley, 2004
-
-## Academic Appointments
-
-- **Professor**, University of Technology, Department of Computer Science, 2018-Present
-- **Associate Professor**, University of Technology, Department of Computer Science, 2014-2018
-- **Assistant Professor**, University of Technology, Department of Computer Science, 2010-2014
-- **Visiting Researcher**, Google Research, Summer 2016
-- **Visiting Professor**, ETH Zurich, 2015
-
-## Awards and Honors
-
-- ACM Distinguished Scientist, 2022
-- University Research Excellence Award, 2020
-- NSF CAREER Award, 2012
-- Outstanding Dissertation Award, Stanford University, 2010
-- IEEE Young Researcher Award, 2009
-
-## Professional Activities
-
-- **Associate Editor**, Journal of Artificial Intelligence Research, 2018-Present
-- **Program Committee Member**, NeurIPS, ICML, AAAI, 2014-Present
-- **Board Member**, AI Ethics Council, 2019-Present
-- **Chair**, ACM Special Interest Group on Artificial Intelligence, 2020-2022
-
-## Personal
-
-When not engaged in research or teaching, I enjoy hiking, playing chess, and exploring the intersections of technology and art. I am particularly interested in the role of AI in creative processes and the philosophical implications of advanced computational systems.
-        `);
-        setIsLoading(false);
-      });
-  }, []);
+  // Use React Query to fetch about content
+  const { data: aboutData, isLoading: isLoadingContent } = useQuery({
+    queryKey: ['aboutContent'],
+    queryFn: fetchAboutContent
+  });
+  
+  const isLoading = isLoadingProfile || isLoadingContent;
+  const content = aboutData?.content || '';
 
   return (
     <PageTransition>
@@ -81,7 +79,7 @@ When not engaged in research or teaching, I enjoy hiking, playing chess, and exp
                     <div className="absolute -inset-1 bg-gradient-to-tr from-primary/20 to-secondary/40 rounded-2xl blur-md"></div>
                     <img 
                       src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=774&q=80" 
-                      alt="Professor John Smith" 
+                      alt={professor ? `Professor ${professor.first_name} ${professor.last_name}` : "Professor"} 
                       className="w-full rounded-xl relative z-10" 
                     />
                   </div>
