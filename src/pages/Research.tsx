@@ -1,5 +1,5 @@
 
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import PageTransition from '@/components/layout/PageTransition';
 import ReactMarkdown from 'react-markdown';
 import { supabase } from '@/integrations/supabase/client';
@@ -16,13 +16,30 @@ const fetchResearchContent = async () => {
     
     if (error) {
       console.error('Error fetching research content:', error);
-      throw error;
+      // Fallback to markdown file
+      const response = await fetch('/src/data/research.md');
+      return { content: await response.text() };
     }
     
     if (!data) {
       // Fallback to markdown file if no data in database
       const response = await fetch('/src/data/research.md');
-      return { content: await response.text() };
+      const content = await response.text();
+      
+      // Insert the content into the database for future use
+      try {
+        await supabase
+          .from('page_content')
+          .insert({
+            page: 'research',
+            content: content
+          })
+          .select();
+      } catch (insertError) {
+        console.error('Error inserting research content:', insertError);
+      }
+        
+      return { content };
     }
     
     return data;
@@ -36,14 +53,23 @@ const fetchResearchContent = async () => {
 
 // Function to fetch research projects from Supabase
 const fetchResearchProjects = async () => {
-  const { data, error } = await supabase
-    .from('research_projects')
-    .select('*')
-    .eq('status', 'active')
-    .order('created_at', { ascending: false });
-  
-  if (error) throw error;
-  return data || [];
+  try {
+    const { data, error } = await supabase
+      .from('research_projects')
+      .select('*')
+      .eq('status', 'active')
+      .order('created_at', { ascending: false });
+    
+    if (error) {
+      console.error('Error fetching research projects:', error);
+      return [];
+    }
+    
+    return data || [];
+  } catch (error) {
+    console.error('Error in fetchResearchProjects:', error);
+    return [];
+  }
 };
 
 const Research = () => {
@@ -78,7 +104,7 @@ const Research = () => {
       "distributed": "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80"
     };
     
-    return defaultImages[category.toLowerCase()] || "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80";
+    return defaultImages[category?.toLowerCase()] || "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80";
   }
 
   // If there are fewer than 3 projects, add defaults
