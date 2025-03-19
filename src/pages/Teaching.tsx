@@ -2,9 +2,11 @@
 import React, { useState } from 'react';
 import PageTransition from '@/components/layout/PageTransition';
 import ReactMarkdown from 'react-markdown';
-import { Bookmark } from 'lucide-react';
+import { Bookmark, FileText, Book, Calendar, ListChecks } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useQuery } from '@tanstack/react-query';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Button } from '@/components/ui/button';
 
 // Function to fetch teaching page content
 const fetchTeachingContent = async () => {
@@ -17,13 +19,30 @@ const fetchTeachingContent = async () => {
     
     if (error) {
       console.error('Error fetching teaching content:', error);
-      throw error;
+      // Fallback to markdown file
+      const response = await fetch('/src/data/teaching.md');
+      return { content: await response.text() };
     }
     
     if (!data) {
       // Fallback to markdown file if no data in database
       const response = await fetch('/src/data/teaching.md');
-      return { content: await response.text() };
+      const content = await response.text();
+      
+      // Insert the content into the database for future use
+      try {
+        await supabase
+          .from('page_content')
+          .insert({
+            page: 'teaching',
+            content: content
+          })
+          .select();
+      } catch (insertError) {
+        console.error('Error inserting teaching content:', insertError);
+      }
+      
+      return { content };
     }
     
     return data;
@@ -37,17 +56,49 @@ const fetchTeachingContent = async () => {
 
 // Function to fetch courses from Supabase
 const fetchCourses = async () => {
-  const { data, error } = await supabase
-    .from('courses')
-    .select('*')
-    .eq('status', 'active')
-    .order('code', { ascending: true });
-  
-  if (error) throw error;
-  return data || [];
+  try {
+    const { data, error } = await supabase
+      .from('courses')
+      .select('*')
+      .eq('status', 'active')
+      .order('code', { ascending: true });
+    
+    if (error) {
+      console.error('Error fetching courses:', error);
+      return [];
+    }
+    
+    return data || [];
+  } catch (error) {
+    console.error('Error in fetchCourses:', error);
+    return [];
+  }
+};
+
+// Function to fetch course materials from Supabase
+const fetchCourseMaterials = async (courseId: string) => {
+  try {
+    const { data, error } = await supabase
+      .from('course_materials')
+      .select('*')
+      .eq('course_id', courseId)
+      .order('created_at', { ascending: false });
+    
+    if (error) {
+      console.error(`Error fetching materials for course ${courseId}:`, error);
+      return [];
+    }
+    
+    return data || [];
+  } catch (error) {
+    console.error(`Error in fetchCourseMaterials for ${courseId}:`, error);
+    return [];
+  }
 };
 
 const Teaching = () => {
+  const [selectedCourse, setSelectedCourse] = useState<string | null>(null);
+  
   // Fetch teaching content using React Query
   const { data: contentData, isLoading: isLoadingContent } = useQuery({
     queryKey: ['teachingContent'],
@@ -60,17 +111,25 @@ const Teaching = () => {
     queryFn: fetchCourses
   });
   
+  // Fetch course materials using React Query
+  const { data: materialsData = [], isLoading: isLoadingMaterials } = useQuery({
+    queryKey: ['courseMaterials', selectedCourse],
+    queryFn: () => selectedCourse ? fetchCourseMaterials(selectedCourse) : Promise.resolve([]),
+    enabled: !!selectedCourse,
+  });
+  
   const isLoading = isLoadingContent || isLoadingCourses;
   const content = contentData?.content || '';
 
   // Map courses data or use fallback if no courses in database
   const courses = coursesData.length > 0 ? coursesData.map(course => ({
+    id: course.id,
     code: course.code,
     title: course.title,
     level: course.code.startsWith('4') || course.code.startsWith('5') ? 'Graduate' : 'Undergraduate',
     term: `${course.semester} ${course.year}`,
     description: course.description,
-    syllabus: "#",
+    syllabus: "#", // This would ideally be a link to a syllabus document
     highlights: course.highlights && course.highlights.length > 0 ? course.highlights : [
       "Course materials and resources",
       "Interactive learning activities",
@@ -122,6 +181,20 @@ const Teaching = () => {
     }
   ];
 
+  // Group materials by type
+  const groupedMaterials = materialsData.reduce((acc, material) => {
+    if (!acc[material.type]) {
+      acc[material.type] = [];
+    }
+    acc[material.type].push(material);
+    return acc;
+  }, {} as Record<string, any[]>);
+
+  // Get the selected course details
+  const selectedCourseDetails = selectedCourse 
+    ? courses.find(course => course.id === selectedCourse) 
+    : null;
+
   return (
     <PageTransition>
       <div className="pt-24 pb-16">
@@ -134,73 +207,267 @@ const Teaching = () => {
             <div className="h-1 w-20 bg-primary mx-auto mb-8"></div>
           </div>
           
-          {/* Featured Courses */}
+          {/* Courses Section */}
           <div className="mb-16">
             <h2 className="text-3xl font-serif font-medium mb-8 text-center">Current Courses</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {courses.map((course, index) => (
-                <div 
-                  key={course.code} 
-                  className="bg-white rounded-lg border shadow-sm overflow-hidden animate-slide-up"
-                  style={{ animationDelay: `${index * 0.2}s` }}
-                >
-                  <div className="p-1 bg-gradient-to-r from-primary/20 to-secondary/20"></div>
-                  <div className="p-6">
-                    <div className="flex justify-between items-start mb-4">
-                      <div>
-                        <h3 className="text-xl font-serif font-medium">{course.code}</h3>
-                        <p className="text-lg">{course.title}</p>
-                      </div>
-                      <span className="text-xs px-2 py-1 bg-muted rounded-full">
-                        {course.term}
-                      </span>
-                    </div>
-                    <p className="text-muted-foreground mb-6">
-                      {course.description}
-                    </p>
-                    <div className="mb-6">
-                      <h4 className="text-sm font-semibold mb-2">Course Highlights:</h4>
-                      <ul className="space-y-1">
-                        {course.highlights.map((highlight, i) => (
-                          <li key={i} className="flex items-start gap-2 text-sm">
-                            <Bookmark size={16} className="mt-0.5 shrink-0 text-primary/70" />
-                            <span>{highlight}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                    <a 
-                      href={course.syllabus} 
-                      className="text-sm text-primary hover-underline-animation"
+            
+            {selectedCourse ? (
+              // Course Detail View
+              <div className="animate-fade-in">
+                <div className="flex justify-between items-start mb-6">
+                  <div>
+                    <Button 
+                      variant="ghost" 
+                      onClick={() => setSelectedCourse(null)}
+                      className="mb-4"
                     >
-                      View Syllabus
-                    </a>
+                      ← Back to All Courses
+                    </Button>
+                    <h3 className="text-2xl font-serif font-medium">{selectedCourseDetails?.code}: {selectedCourseDetails?.title}</h3>
+                    <p className="text-muted-foreground">{selectedCourseDetails?.term}</p>
                   </div>
                 </div>
-              ))}
-            </div>
-          </div>
-          
-          {/* Teaching Philosophy and Resources */}
-          <div className="max-w-4xl mx-auto">
-            {isLoading ? (
-              <div className="space-y-4 animate-pulse">
-                <div className="h-6 bg-muted rounded w-3/4"></div>
-                <div className="h-4 bg-muted rounded w-full"></div>
-                <div className="h-4 bg-muted rounded w-5/6"></div>
-                <div className="h-4 bg-muted rounded w-4/5"></div>
-                <div className="h-6 bg-muted rounded w-1/2 mt-8"></div>
-                <div className="h-4 bg-muted rounded w-full"></div>
-                <div className="h-4 bg-muted rounded w-full"></div>
+                
+                <div className="bg-card p-6 rounded-lg shadow-sm mb-8">
+                  <h4 className="text-lg font-medium mb-2">Course Description</h4>
+                  <p className="text-muted-foreground">{selectedCourseDetails?.description}</p>
+                </div>
+                
+                <Tabs defaultValue="lectures" className="w-full">
+                  <TabsList className="grid w-full grid-cols-4">
+                    <TabsTrigger value="lectures">
+                      <FileText className="h-4 w-4 mr-2" />
+                      Lectures
+                    </TabsTrigger>
+                    <TabsTrigger value="assignments">
+                      <ListChecks className="h-4 w-4 mr-2" />
+                      Assignments
+                    </TabsTrigger>
+                    <TabsTrigger value="syllabus">
+                      <Book className="h-4 w-4 mr-2" />
+                      Syllabus
+                    </TabsTrigger>
+                    <TabsTrigger value="exams">
+                      <Calendar className="h-4 w-4 mr-2" />
+                      Exams
+                    </TabsTrigger>
+                  </TabsList>
+                  
+                  <TabsContent value="lectures" className="mt-6">
+                    {isLoadingMaterials ? (
+                      <div className="flex justify-center items-center h-40">
+                        <div className="animate-spin h-8 w-8 border-4 border-primary border-r-transparent rounded-full"></div>
+                      </div>
+                    ) : !groupedMaterials.pdf || groupedMaterials.pdf.length === 0 ? (
+                      <div className="text-center py-10 text-muted-foreground">
+                        <FileText className="h-12 w-12 mx-auto mb-3 opacity-30" />
+                        <p>No lecture materials available for this course yet.</p>
+                      </div>
+                    ) : (
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {groupedMaterials.pdf?.map(material => (
+                          <a 
+                            key={material.id}
+                            href={material.file_path}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="bg-accent/20 rounded-lg p-4 hover:bg-accent/30 transition-colors"
+                          >
+                            <div className="flex items-start gap-3">
+                              <FileText className="h-6 w-6 text-primary shrink-0 mt-1" />
+                              <div>
+                                <h5 className="font-medium">{material.title}</h5>
+                                {material.description && (
+                                  <p className="text-sm text-muted-foreground mt-1">{material.description}</p>
+                                )}
+                              </div>
+                            </div>
+                          </a>
+                        ))}
+                      </div>
+                    )}
+                  </TabsContent>
+                  
+                  <TabsContent value="assignments" className="mt-6">
+                    {isLoadingMaterials ? (
+                      <div className="flex justify-center items-center h-40">
+                        <div className="animate-spin h-8 w-8 border-4 border-primary border-r-transparent rounded-full"></div>
+                      </div>
+                    ) : !groupedMaterials.assignment || groupedMaterials.assignment.length === 0 ? (
+                      <div className="text-center py-10 text-muted-foreground">
+                        <ListChecks className="h-12 w-12 mx-auto mb-3 opacity-30" />
+                        <p>No assignments available for this course yet.</p>
+                      </div>
+                    ) : (
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {groupedMaterials.assignment?.map(material => (
+                          <a 
+                            key={material.id}
+                            href={material.file_path}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="bg-accent/20 rounded-lg p-4 hover:bg-accent/30 transition-colors"
+                          >
+                            <div className="flex items-start gap-3">
+                              <ListChecks className="h-6 w-6 text-primary shrink-0 mt-1" />
+                              <div>
+                                <h5 className="font-medium">{material.title}</h5>
+                                {material.description && (
+                                  <p className="text-sm text-muted-foreground mt-1">{material.description}</p>
+                                )}
+                              </div>
+                            </div>
+                          </a>
+                        ))}
+                      </div>
+                    )}
+                  </TabsContent>
+                  
+                  <TabsContent value="syllabus" className="mt-6">
+                    {isLoadingMaterials ? (
+                      <div className="flex justify-center items-center h-40">
+                        <div className="animate-spin h-8 w-8 border-4 border-primary border-r-transparent rounded-full"></div>
+                      </div>
+                    ) : !groupedMaterials.syllabus || groupedMaterials.syllabus.length === 0 ? (
+                      <div className="text-center py-10 text-muted-foreground">
+                        <Book className="h-12 w-12 mx-auto mb-3 opacity-30" />
+                        <p>No syllabus available for this course yet.</p>
+                      </div>
+                    ) : (
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {groupedMaterials.syllabus?.map(material => (
+                          <a 
+                            key={material.id}
+                            href={material.file_path}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="bg-accent/20 rounded-lg p-4 hover:bg-accent/30 transition-colors"
+                          >
+                            <div className="flex items-start gap-3">
+                              <Book className="h-6 w-6 text-primary shrink-0 mt-1" />
+                              <div>
+                                <h5 className="font-medium">{material.title}</h5>
+                                {material.description && (
+                                  <p className="text-sm text-muted-foreground mt-1">{material.description}</p>
+                                )}
+                              </div>
+                            </div>
+                          </a>
+                        ))}
+                      </div>
+                    )}
+                  </TabsContent>
+                  
+                  <TabsContent value="exams" className="mt-6">
+                    {isLoadingMaterials ? (
+                      <div className="flex justify-center items-center h-40">
+                        <div className="animate-spin h-8 w-8 border-4 border-primary border-r-transparent rounded-full"></div>
+                      </div>
+                    ) : !groupedMaterials.exam || groupedMaterials.exam.length === 0 ? (
+                      <div className="text-center py-10 text-muted-foreground">
+                        <Calendar className="h-12 w-12 mx-auto mb-3 opacity-30" />
+                        <p>No exam materials available for this course yet.</p>
+                      </div>
+                    ) : (
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {groupedMaterials.exam?.map(material => (
+                          <a 
+                            key={material.id}
+                            href={material.file_path}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="bg-accent/20 rounded-lg p-4 hover:bg-accent/30 transition-colors"
+                          >
+                            <div className="flex items-start gap-3">
+                              <Calendar className="h-6 w-6 text-primary shrink-0 mt-1" />
+                              <div>
+                                <h5 className="font-medium">{material.title}</h5>
+                                {material.description && (
+                                  <p className="text-sm text-muted-foreground mt-1">{material.description}</p>
+                                )}
+                              </div>
+                            </div>
+                          </a>
+                        ))}
+                      </div>
+                    )}
+                  </TabsContent>
+                </Tabs>
               </div>
             ) : (
-              <div className="prose prose-lg max-w-none animate-fade-in">
-                <ReactMarkdown>
-                  {content}
-                </ReactMarkdown>
+              // Course Listing View
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {courses.map((course, index) => (
+                  <div 
+                    key={course.code} 
+                    className="bg-white rounded-lg border shadow-sm overflow-hidden animate-slide-up cursor-pointer"
+                    style={{ animationDelay: `${index * 0.2}s` }}
+                    onClick={() => setSelectedCourse(course.id)}
+                  >
+                    <div className="p-1 bg-gradient-to-r from-primary/20 to-secondary/20"></div>
+                    <div className="p-6">
+                      <div className="flex justify-between items-start mb-4">
+                        <div>
+                          <h3 className="text-xl font-serif font-medium">{course.code}</h3>
+                          <p className="text-lg">{course.title}</p>
+                        </div>
+                        <span className="text-xs px-2 py-1 bg-muted rounded-full">
+                          {course.term}
+                        </span>
+                      </div>
+                      <p className="text-muted-foreground mb-6">
+                        {course.description}
+                      </p>
+                      <div className="mb-6">
+                        <h4 className="text-sm font-semibold mb-2">Course Highlights:</h4>
+                        <ul className="space-y-1">
+                          {course.highlights.map((highlight, i) => (
+                            <li key={i} className="flex items-start gap-2 text-sm">
+                              <Bookmark size={16} className="mt-0.5 shrink-0 text-primary/70" />
+                              <span>{highlight}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                      <Button 
+                        variant="ghost" 
+                        className="text-sm text-primary hover:underline-animation"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedCourse(course.id);
+                        }}
+                      >
+                        View Course Materials
+                      </Button>
+                    </div>
+                  </div>
+                ))}
               </div>
             )}
           </div>
+          
+          {/* Teaching Philosophy and Resources */}
+          {!selectedCourse && (
+            <div className="max-w-4xl mx-auto">
+              {isLoading ? (
+                <div className="space-y-4 animate-pulse">
+                  <div className="h-6 bg-muted rounded w-3/4"></div>
+                  <div className="h-4 bg-muted rounded w-full"></div>
+                  <div className="h-4 bg-muted rounded w-5/6"></div>
+                  <div className="h-4 bg-muted rounded w-4/5"></div>
+                  <div className="h-6 bg-muted rounded w-1/2 mt-8"></div>
+                  <div className="h-4 bg-muted rounded w-full"></div>
+                  <div className="h-4 bg-muted rounded w-full"></div>
+                </div>
+              ) : (
+                <div className="prose prose-lg max-w-none animate-fade-in">
+                  <ReactMarkdown>
+                    {content}
+                  </ReactMarkdown>
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </PageTransition>
