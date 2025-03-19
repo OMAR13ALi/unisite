@@ -91,7 +91,13 @@ const Settings = () => {
   
   // Mutation to save settings
   const saveMutation = useMutation({
-    mutationFn: async (newSettings) => {
+    mutationFn: async (newSettings: {
+      id?: string | null;
+      site_title: string;
+      site_description: string;
+      footer_text: string;
+      updated_at: string;
+    }) => {
       const { data, error } = await supabase
         .from('site_settings')
         .upsert([newSettings])
