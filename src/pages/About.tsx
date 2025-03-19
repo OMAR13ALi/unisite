@@ -1,21 +1,46 @@
 
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import PageTransition from '@/components/layout/PageTransition';
 import { FileDown } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { supabase } from '@/integrations/supabase/client';
 import { useQuery } from '@tanstack/react-query';
 
-// Function to fetch professor profile
+// Function to fetch professor profile - updated to handle multiple admins
 const fetchProfessorProfile = async () => {
-  const { data, error } = await supabase
-    .from('profiles')
-    .select('*')
-    .eq('is_admin', true)
-    .single();
-  
-  if (error) throw error;
-  return data;
+  try {
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('is_admin', true)
+      .limit(1); // Limit to just one admin profile
+    
+    if (error) throw error;
+    
+    // Return the first profile if we have data
+    if (data && data.length > 0) {
+      return data[0];
+    }
+    
+    // Return a default profile if no admin profiles found
+    return {
+      id: 'default',
+      first_name: 'John',
+      last_name: 'Smith',
+      title: 'Professor',
+      bio: 'Computer Science Professor'
+    };
+  } catch (error) {
+    console.error('Error fetching professor profile:', error);
+    // Return default data on error
+    return {
+      id: 'default',
+      first_name: 'John',
+      last_name: 'Smith',
+      title: 'Professor',
+      bio: 'Computer Science Professor'
+    };
+  }
 };
 
 // Function to fetch About page content
@@ -29,13 +54,26 @@ const fetchAboutContent = async () => {
     
     if (error) {
       console.error('Error fetching about content:', error);
-      throw error;
+      // Fallback to markdown file
+      const response = await fetch('/src/data/about.md');
+      return { content: await response.text() };
     }
     
     if (!data) {
       // Fallback to markdown file if no data in database
       const response = await fetch('/src/data/about.md');
-      return { content: await response.text() };
+      const content = await response.text();
+      
+      // Insert the content into the database for future use
+      await supabase
+        .from('page_content')
+        .insert({
+          page: 'about',
+          content: content
+        })
+        .select();
+        
+      return { content };
     }
     
     return data;

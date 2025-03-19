@@ -9,8 +9,18 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
+// Define the site settings type for better type safety
+interface SiteSettings {
+  id?: string | null;
+  site_title: string;
+  site_description: string;
+  footer_text: string;
+  updated_at?: string;
+  created_at?: string;
+}
+
 // Function to fetch site settings
-const fetchSiteSettings = async () => {
+const fetchSiteSettings = async (): Promise<SiteSettings> => {
   try {
     const { data, error } = await supabase
       .from('site_settings')
@@ -91,13 +101,7 @@ const Settings = () => {
   
   // Mutation to save settings
   const saveMutation = useMutation({
-    mutationFn: async (newSettings: {
-      id?: string | null;
-      site_title: string;
-      site_description: string;
-      footer_text: string;
-      updated_at: string;
-    }) => {
+    mutationFn: async (newSettings: SiteSettings) => {
       const { data, error } = await supabase
         .from('site_settings')
         .upsert([newSettings])
@@ -123,7 +127,7 @@ const Settings = () => {
     setIsSaving(true);
     
     saveMutation.mutate({
-      id: settings?.id || undefined,
+      id: settings?.id,
       site_title: siteTitle,
       site_description: siteDescription,
       footer_text: footerText,
