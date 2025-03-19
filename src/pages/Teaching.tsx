@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import PageTransition from '@/components/layout/PageTransition';
 import ReactMarkdown from 'react-markdown';
-import { Bookmark, FileText, Book, Calendar, ListChecks } from 'lucide-react';
+import { Bookmark, FileText, Book, Calendar, ListChecks, BookOpen } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useQuery } from '@tanstack/react-query';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -96,6 +96,24 @@ const fetchCourseMaterials = async (courseId: string) => {
   }
 };
 
+// Get icon for material type
+const getMaterialTypeIcon = (type: string) => {
+  switch (type) {
+    case 'pdf':
+      return <FileText className="h-6 w-6 text-primary shrink-0 mt-1" />;
+    case 'syllabus':
+      return <BookOpen className="h-6 w-6 text-primary shrink-0 mt-1" />;
+    case 'assignment':
+      return <ListChecks className="h-6 w-6 text-primary shrink-0 mt-1" />;
+    case 'exam':
+      return <Calendar className="h-6 w-6 text-primary shrink-0 mt-1" />;
+    case 'video':
+      return <FileText className="h-6 w-6 text-primary shrink-0 mt-1" />;
+    default:
+      return <FileText className="h-6 w-6 text-primary shrink-0 mt-1" />;
+  }
+};
+
 const Teaching = () => {
   const [selectedCourse, setSelectedCourse] = useState<string | null>(null);
   
@@ -138,6 +156,7 @@ const Teaching = () => {
     ]
   })) : [
     {
+      id: "fallback-1",
       code: "CS 401",
       title: "Advanced Artificial Intelligence",
       level: "Graduate",
@@ -152,6 +171,7 @@ const Teaching = () => {
       ]
     },
     {
+      id: "fallback-2",
       code: "CS 301",
       title: "Machine Learning",
       level: "Undergraduate",
@@ -166,6 +186,7 @@ const Teaching = () => {
       ]
     },
     {
+      id: "fallback-3",
       code: "CS 201",
       title: "Data Structures and Algorithms",
       level: "Undergraduate",
@@ -233,19 +254,19 @@ const Teaching = () => {
                   <p className="text-muted-foreground">{selectedCourseDetails?.description}</p>
                 </div>
                 
-                <Tabs defaultValue="lectures" className="w-full">
+                <Tabs defaultValue="syllabus" className="w-full">
                   <TabsList className="grid w-full grid-cols-4">
+                    <TabsTrigger value="syllabus">
+                      <BookOpen className="h-4 w-4 mr-2" />
+                      Syllabus
+                    </TabsTrigger>
                     <TabsTrigger value="lectures">
                       <FileText className="h-4 w-4 mr-2" />
-                      Lectures
+                      Lecture Notes
                     </TabsTrigger>
                     <TabsTrigger value="assignments">
                       <ListChecks className="h-4 w-4 mr-2" />
                       Assignments
-                    </TabsTrigger>
-                    <TabsTrigger value="syllabus">
-                      <Book className="h-4 w-4 mr-2" />
-                      Syllabus
                     </TabsTrigger>
                     <TabsTrigger value="exams">
                       <Calendar className="h-4 w-4 mr-2" />
@@ -253,6 +274,43 @@ const Teaching = () => {
                     </TabsTrigger>
                   </TabsList>
                   
+                  {/* Syllabus Tab */}
+                  <TabsContent value="syllabus" className="mt-6">
+                    {isLoadingMaterials ? (
+                      <div className="flex justify-center items-center h-40">
+                        <div className="animate-spin h-8 w-8 border-4 border-primary border-r-transparent rounded-full"></div>
+                      </div>
+                    ) : !groupedMaterials.syllabus || groupedMaterials.syllabus.length === 0 ? (
+                      <div className="text-center py-10 text-muted-foreground">
+                        <BookOpen className="h-12 w-12 mx-auto mb-3 opacity-30" />
+                        <p>No syllabus available for this course yet.</p>
+                      </div>
+                    ) : (
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {groupedMaterials.syllabus?.map(material => (
+                          <a 
+                            key={material.id}
+                            href={material.file_path}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="bg-accent/20 rounded-lg p-4 hover:bg-accent/30 transition-colors"
+                          >
+                            <div className="flex items-start gap-3">
+                              <BookOpen className="h-6 w-6 text-primary shrink-0 mt-1" />
+                              <div>
+                                <h5 className="font-medium">{material.title}</h5>
+                                {material.description && (
+                                  <p className="text-sm text-muted-foreground mt-1">{material.description}</p>
+                                )}
+                              </div>
+                            </div>
+                          </a>
+                        ))}
+                      </div>
+                    )}
+                  </TabsContent>
+                  
+                  {/* Lecture Notes Tab */}
                   <TabsContent value="lectures" className="mt-6">
                     {isLoadingMaterials ? (
                       <div className="flex justify-center items-center h-40">
@@ -288,6 +346,7 @@ const Teaching = () => {
                     )}
                   </TabsContent>
                   
+                  {/* Assignments Tab */}
                   <TabsContent value="assignments" className="mt-6">
                     {isLoadingMaterials ? (
                       <div className="flex justify-center items-center h-40">
@@ -323,41 +382,7 @@ const Teaching = () => {
                     )}
                   </TabsContent>
                   
-                  <TabsContent value="syllabus" className="mt-6">
-                    {isLoadingMaterials ? (
-                      <div className="flex justify-center items-center h-40">
-                        <div className="animate-spin h-8 w-8 border-4 border-primary border-r-transparent rounded-full"></div>
-                      </div>
-                    ) : !groupedMaterials.syllabus || groupedMaterials.syllabus.length === 0 ? (
-                      <div className="text-center py-10 text-muted-foreground">
-                        <Book className="h-12 w-12 mx-auto mb-3 opacity-30" />
-                        <p>No syllabus available for this course yet.</p>
-                      </div>
-                    ) : (
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        {groupedMaterials.syllabus?.map(material => (
-                          <a 
-                            key={material.id}
-                            href={material.file_path}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="bg-accent/20 rounded-lg p-4 hover:bg-accent/30 transition-colors"
-                          >
-                            <div className="flex items-start gap-3">
-                              <Book className="h-6 w-6 text-primary shrink-0 mt-1" />
-                              <div>
-                                <h5 className="font-medium">{material.title}</h5>
-                                {material.description && (
-                                  <p className="text-sm text-muted-foreground mt-1">{material.description}</p>
-                                )}
-                              </div>
-                            </div>
-                          </a>
-                        ))}
-                      </div>
-                    )}
-                  </TabsContent>
-                  
+                  {/* Exams Tab */}
                   <TabsContent value="exams" className="mt-6">
                     {isLoadingMaterials ? (
                       <div className="flex justify-center items-center h-40">
@@ -399,7 +424,7 @@ const Teaching = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 {courses.map((course, index) => (
                   <div 
-                    key={course.code} 
+                    key={course.id} 
                     className="bg-white rounded-lg border shadow-sm overflow-hidden animate-slide-up cursor-pointer"
                     style={{ animationDelay: `${index * 0.2}s` }}
                     onClick={() => setSelectedCourse(course.id)}

@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -37,7 +36,7 @@ import {
   CardFooter
 } from '@/components/ui/card';
 import { toast } from 'sonner';
-import { Plus, Pencil, Trash, Upload, Book, File, Video, FileText, X } from 'lucide-react';
+import { Plus, Pencil, Trash, Upload, Book, File, Video, FileText, X, BookOpen, ListChecks, Calendar } from 'lucide-react';
 
 // Types
 interface Course {
@@ -60,6 +59,16 @@ interface Material {
   description: string | null;
   created_at: string;
 }
+
+// Define material types
+const MATERIAL_TYPES = [
+  { value: 'pdf', label: 'Lecture Notes (PDF)', icon: FileText },
+  { value: 'syllabus', label: 'Syllabus', icon: BookOpen },
+  { value: 'assignment', label: 'Assignment', icon: ListChecks },
+  { value: 'exam', label: 'Exam', icon: Calendar },
+  { value: 'video', label: 'Video', icon: Video },
+  { value: 'other', label: 'Other Material', icon: File }
+];
 
 // Fetch courses
 const fetchCourses = async () => {
@@ -108,6 +117,7 @@ const TeachingManagement = () => {
   });
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [materialsView, setMaterialsView] = useState<'all' | 'by-type'>('all');
 
   // React Query for fetching courses
   const { data: courses, isLoading: isLoadingCourses } = useQuery({
@@ -210,7 +220,7 @@ const TeachingManagement = () => {
       // 1. Upload file to storage
       const fileExt = file.name.split('.').pop();
       const fileName = `${Math.random().toString(36).substring(2, 15)}_${Math.random().toString(36).substring(2, 15)}.${fileExt}`;
-      const filePath = `${courseId}/${fileName}`;
+      const filePath = `${courseId}/${type}/${fileName}`;
       
       const { error: uploadError } = await supabase.storage
         .from('course_materials')
@@ -302,10 +312,14 @@ const TeachingManagement = () => {
     if (e.target.files && e.target.files[0]) {
       setSelectedFile(e.target.files[0]);
       
-      // Auto-detect file type
+      // Auto-detect file type for PDFs
       const fileName = e.target.files[0].name.toLowerCase();
       if (fileName.endsWith('.pdf')) {
-        setMaterialFormData(prev => ({ ...prev, type: 'pdf' }));
+        // Keep the current type if it's a PDF-compatible type
+        const isPdfType = ['pdf', 'syllabus', 'assignment', 'exam'].includes(materialFormData.type);
+        if (!isPdfType) {
+          setMaterialFormData(prev => ({ ...prev, type: 'pdf' }));
+        }
       } else if (fileName.endsWith('.mp4') || fileName.endsWith('.webm') || fileName.endsWith('.mov')) {
         setMaterialFormData(prev => ({ ...prev, type: 'video' }));
       } else {
@@ -397,6 +411,27 @@ const TeachingManagement = () => {
         filePath: material.file_path 
       });
     }
+  };
+
+  // Group materials by type
+  const materialsByType = materials ? materials.reduce((acc, material) => {
+    if (!acc[material.type]) {
+      acc[material.type] = [];
+    }
+    acc[material.type].push(material);
+    return acc;
+  }, {} as Record<string, Material[]>) : {};
+
+  // Get icon for material type
+  const getMaterialTypeIcon = (type: string) => {
+    const materialType = MATERIAL_TYPES.find(mt => mt.value === type);
+    const Icon = materialType?.icon || File;
+    return <Icon className="h-6 w-6 text-primary shrink-0 mt-1" />;
+  };
+
+  // Get display name for material type
+  const getMaterialTypeLabel = (type: string) => {
+    return MATERIAL_TYPES.find(mt => mt.value === type)?.label || type.charAt(0).toUpperCase() + type.slice(1);
   };
 
   if (!isAdmin) {
@@ -549,9 +584,11 @@ const TeachingManagement = () => {
                         value={materialFormData.type}
                         onChange={handleMaterialInputChange}
                       >
-                        <option value="pdf">PDF Document</option>
-                        <option value="video">Video</option>
-                        <option value="other">Other</option>
+                        {MATERIAL_TYPES.map(type => (
+                          <option key={type.value} value={type.value}>
+                            {type.label}
+                          </option>
+                        ))}
                       </select>
                     </div>
                     
@@ -575,14 +612,23 @@ const TeachingManagement = () => {
                           type="file"
                           className="hidden"
                           onChange={handleFileChange}
-                          accept={materialFormData.type === 'pdf' ? '.pdf' : materialFormData.type === 'video' ? '.mp4,.webm,.mov' : '*'}
+                          accept={
+                            ['pdf', 'syllabus', 'assignment', 'exam'].includes(materialFormData.type) 
+                              ? '.pdf' 
+                              : materialFormData.type === 'video' 
+                                ? '.mp4,.webm,.mov' 
+                                : '*'
+                          }
                         />
                         {selectedFile ? (
                           <div className="text-center">
                             <div className="flex items-center justify-center">
-                              {materialFormData.type === 'pdf' && <FileText size={32} className="text-blue-500 mb-2" />}
-                              {materialFormData.type === 'video' && <Video size={32} className="text-red-500 mb-2" />}
-                              {materialFormData.type === 'other' && <File size={32} className="text-gray-500 mb-2" />}
+                              {['pdf', 'syllabus', 'assignment', 'exam'].includes(materialFormData.type) && 
+                                <FileText size={32} className="text-blue-500 mb-2" />}
+                              {materialFormData.type === 'video' && 
+                                <Video size={32} className="text-red-500 mb-2" />}
+                              {!['pdf', 'syllabus', 'assignment', 'exam', 'video'].includes(materialFormData.type) && 
+                                <File size={32} className="text-gray-500 mb-2" />}
                             </div>
                             <p className="text-sm font-medium">{selectedFile.name}</p>
                             <p className="text-xs text-muted-foreground mt-1">
@@ -603,9 +649,11 @@ const TeachingManagement = () => {
                             <Upload size={32} className="mx-auto text-muted-foreground mb-2" />
                             <p className="text-sm font-medium">Click to upload or drag and drop</p>
                             <p className="text-xs text-muted-foreground mt-1">
-                              {materialFormData.type === 'pdf' ? 'PDF files only' : 
-                               materialFormData.type === 'video' ? 'Video files only (MP4, WebM, MOV)' : 
-                               'All file types supported'}
+                              {['pdf', 'syllabus', 'assignment', 'exam'].includes(materialFormData.type) 
+                                ? 'PDF files only' 
+                                : materialFormData.type === 'video' 
+                                  ? 'Video files only (MP4, WebM, MOV)' 
+                                  : 'All file types supported'}
                             </p>
                           </label>
                         )}
@@ -808,6 +856,28 @@ const TeachingManagement = () => {
                 <p className="text-sm text-muted-foreground">{selectedCourse.semester} {selectedCourse.year}</p>
               </div>
               
+              {/* View toggle */}
+              <div className="flex justify-end mb-4">
+                <div className="border rounded-md p-1 flex">
+                  <Button 
+                    variant={materialsView === 'all' ? 'secondary' : 'ghost'} 
+                    size="sm"
+                    onClick={() => setMaterialsView('all')}
+                    className="text-xs"
+                  >
+                    All Materials
+                  </Button>
+                  <Button 
+                    variant={materialsView === 'by-type' ? 'secondary' : 'ghost'} 
+                    size="sm"
+                    onClick={() => setMaterialsView('by-type')}
+                    className="text-xs"
+                  >
+                    By Category
+                  </Button>
+                </div>
+              </div>
+              
               {isLoadingMaterials ? (
                 <div className="p-8 text-center">
                   <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
@@ -826,21 +896,19 @@ const TeachingManagement = () => {
                     Upload Your First Material
                   </Button>
                 </div>
-              ) : (
+              ) : materialsView === 'all' ? (
+                // All materials view
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                   {materials.map((material) => (
                     <Card key={material.id} className="overflow-hidden">
                       <div className="h-32 bg-muted flex items-center justify-center">
-                        {material.type === 'pdf' ? (
-                          <FileText size={48} className="text-blue-500" />
-                        ) : material.type === 'video' ? (
-                          <Video size={48} className="text-red-500" />
-                        ) : (
-                          <File size={48} className="text-gray-500" />
-                        )}
+                        {getMaterialTypeIcon(material.type)}
                       </div>
                       <CardContent className="pt-4">
                         <h4 className="font-medium line-clamp-2">{material.title}</h4>
+                        <p className="text-xs text-primary mt-1">
+                          {getMaterialTypeLabel(material.type)}
+                        </p>
                         {material.description && (
                           <p className="text-sm text-muted-foreground mt-1 line-clamp-2">{material.description}</p>
                         )}
@@ -866,6 +934,50 @@ const TeachingManagement = () => {
                         </Button>
                       </CardFooter>
                     </Card>
+                  ))}
+                </div>
+              ) : (
+                // By type view
+                <div className="space-y-8">
+                  {Object.entries(materialsByType).map(([type, typeMaterials]) => (
+                    <div key={type}>
+                      <h3 className="text-lg font-medium mb-4 flex items-center gap-2">
+                        {getMaterialTypeIcon(type)}
+                        <span>{getMaterialTypeLabel(type)}</span>
+                      </h3>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                        {typeMaterials.map(material => (
+                          <Card key={material.id} className="overflow-hidden">
+                            <CardContent className="pt-4">
+                              <h4 className="font-medium line-clamp-2">{material.title}</h4>
+                              {material.description && (
+                                <p className="text-sm text-muted-foreground mt-1 line-clamp-2">{material.description}</p>
+                              )}
+                              <p className="text-xs text-muted-foreground mt-2">
+                                Added on {new Date(material.created_at).toLocaleDateString()}
+                              </p>
+                            </CardContent>
+                            <CardFooter className="flex justify-between border-t pt-4">
+                              <a 
+                                href={material.file_path} 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                                className="text-primary text-sm hover:underline"
+                              >
+                                View Material
+                              </a>
+                              <Button 
+                                variant="ghost" 
+                                size="sm"
+                                onClick={() => handleDeleteMaterialClick(material)}
+                              >
+                                <Trash size={16} />
+                              </Button>
+                            </CardFooter>
+                          </Card>
+                        ))}
+                      </div>
+                    </div>
                   ))}
                 </div>
               )}
