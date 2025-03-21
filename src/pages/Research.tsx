@@ -1,137 +1,62 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import PageTransition from '@/components/layout/PageTransition';
-import ReactMarkdown from 'react-markdown';
 import { supabase } from '@/integrations/supabase/client';
 import { useQuery } from '@tanstack/react-query';
+import { Button } from '@/components/ui/button';
+import { Filter, Search } from 'lucide-react';
 
-// Function to fetch research content from Supabase
-const fetchResearchContent = async () => {
-  try {
-    const { data, error } = await supabase
-      .from('page_content')
-      .select('content')
-      .eq('page', 'research')
-      .maybeSingle();
-    
-    if (error) {
-      console.error('Error fetching research content:', error);
-      // Fallback to markdown file
-      const response = await fetch('/src/data/research.md');
-      return { content: await response.text() };
-    }
-    
-    if (!data) {
-      // Fallback to markdown file if no data in database
-      const response = await fetch('/src/data/research.md');
-      const content = await response.text();
-      
-      // Insert the content into the database for future use
-      try {
-        await supabase
-          .from('page_content')
-          .insert({
-            page: 'research',
-            content: content
-          })
-          .select();
-      } catch (insertError) {
-        console.error('Error inserting research content:', insertError);
-      }
-        
-      return { content };
-    }
-    
-    return data;
-  } catch (error) {
-    console.error('Error in fetchResearchContent:', error);
-    // Fallback to markdown file
-    const response = await fetch('/src/data/research.md');
-    return { content: await response.text() };
-  }
-};
+// Types
+interface ResearchProject {
+  id: string;
+  title: string;
+  description: string;
+  category: string;
+  status: string;
+  created_at: string;
+}
 
-// Function to fetch research projects from Supabase
+// Fetch research projects
 const fetchResearchProjects = async () => {
-  try {
-    const { data, error } = await supabase
-      .from('research_projects')
-      .select('*')
-      .eq('status', 'active')
-      .order('created_at', { ascending: false });
-    
-    if (error) {
-      console.error('Error fetching research projects:', error);
-      return [];
-    }
-    
-    return data || [];
-  } catch (error) {
-    console.error('Error in fetchResearchProjects:', error);
-    return [];
-  }
+  const { data, error } = await supabase
+    .from('research_projects')
+    .select('*')
+    .order('created_at', { ascending: false });
+  
+  if (error) throw error;
+  return data as ResearchProject[];
 };
 
 const Research = () => {
-  // Fetch research content using React Query
-  const { data: contentData, isLoading: isLoadingContent } = useQuery({
-    queryKey: ['researchContent'],
-    queryFn: fetchResearchContent
-  });
-
-  // Fetch research projects using React Query
-  const { data: projects = [], isLoading: isLoadingProjects } = useQuery({
-    queryKey: ['researchProjects'],
+  const [searchTerm, setSearchTerm] = useState('');
+  const [categoryFilter, setCategoryFilter] = useState<string>('');
+  const [expandedId, setExpandedId] = useState<string | null>(null);
+  
+  // Fetch research projects with React Query
+  const { data: projects = [], isLoading } = useQuery({
+    queryKey: ['research-projects'],
     queryFn: fetchResearchProjects
   });
   
-  const isLoading = isLoadingContent || isLoadingProjects;
-  const content = contentData?.content || '';
-
-  // Map projects to research areas for visualization
-  const researchAreas = projects.slice(0, 3).map(project => ({
-    title: project.title,
-    description: project.description.substring(0, 100) + (project.description.length > 100 ? '...' : ''),
-    image: project.image_url || getDefaultImageForCategory(project.category),
-    delay: "0s"
-  }));
-
-  // Default images based on research category
-  function getDefaultImageForCategory(category) {
-    const defaultImages = {
-      "quantum": "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80",
-      "ai": "https://images.unsplash.com/photo-1620712943543-bcc4688e7485?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80",
-      "distributed": "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80"
-    };
+  // Filter projects based on search term and category
+  const filteredProjects = projects.filter(project => {
+    const matchesSearch = searchTerm === '' || 
+      project.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
+      project.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      project.category.toLowerCase().includes(searchTerm.toLowerCase());
+      
+    const matchesCategory = categoryFilter === '' || project.category === categoryFilter;
     
-    return defaultImages[category?.toLowerCase()] || "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80";
-  }
-
-  // If there are fewer than 3 projects, add defaults
-  while (researchAreas.length < 3) {
-    const defaults = [
-      {
-        title: "Quantum Computing",
-        image: "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80",
-        description: "Exploring quantum algorithms for machine learning and optimization problems.",
-        delay: "0s"
-      },
-      {
-        title: "Ethical AI",
-        image: "https://images.unsplash.com/photo-1620712943543-bcc4688e7485?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80",
-        description: "Developing frameworks for responsible AI development and deployment.",
-        delay: "0s"
-      },
-      {
-        title: "Distributed Systems",
-        image: "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80",
-        description: "Building efficient AI models for edge computing and federated learning.",
-        delay: "0s"
-      }
-    ];
-    
-    researchAreas.push(defaults[researchAreas.length % 3]);
-  }
+    return matchesSearch && matchesCategory;
+  });
+  
+  // Get unique categories for filter
+  const categories = Array.from(new Set(projects.map(project => project.category))).sort();
+  
+  // Toggle project expansion
+  const toggleProjectExpansion = (id: string) => {
+    setExpandedId(expandedId === id ? null : id);
+  };
 
   return (
     <PageTransition>
@@ -143,52 +68,133 @@ const Research = () => {
               Research
             </h1>
             <div className="h-1 w-20 bg-primary mx-auto mb-8"></div>
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto animate-fade-in">
+              Explore our ongoing and completed research projects in various fields of computer science and related disciplines.
+            </p>
           </div>
           
-          {/* Content */}
+          {/* Filters */}
+          <div className="max-w-4xl mx-auto mb-10 animate-slide-up">
+            <div className="bg-white p-6 rounded-lg border shadow-sm">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-lg font-semibold flex items-center">
+                  <Filter size={18} className="mr-2" />
+                  Filter Research Projects
+                </h2>
+                {categoryFilter && (
+                  <Button 
+                    variant="ghost" 
+                    onClick={() => setCategoryFilter('')}
+                    size="sm"
+                  >
+                    Clear Filter
+                  </Button>
+                )}
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="md:col-span-2 relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <Search size={18} className="text-muted-foreground" />
+                  </div>
+                  <input 
+                    type="text" 
+                    placeholder="Search projects..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-10 w-full p-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary/20"
+                  />
+                </div>
+                <div>
+                  <select
+                    value={categoryFilter}
+                    onChange={(e) => setCategoryFilter(e.target.value)}
+                    className="w-full p-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary/20 bg-white"
+                  >
+                    <option value="">All Categories</option>
+                    {categories.map(category => (
+                      <option key={category} value={category}>{category}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          {/* Research Projects */}
           <div className="max-w-4xl mx-auto">
             {isLoading ? (
-              <div className="space-y-4 animate-pulse">
-                <div className="h-6 bg-muted rounded w-3/4"></div>
-                <div className="h-4 bg-muted rounded w-full"></div>
-                <div className="h-4 bg-muted rounded w-5/6"></div>
-                <div className="h-4 bg-muted rounded w-4/5"></div>
-                <div className="h-6 bg-muted rounded w-1/2 mt-8"></div>
-                <div className="h-4 bg-muted rounded w-full"></div>
-                <div className="h-4 bg-muted rounded w-full"></div>
+              // Loading skeleton
+              <div className="space-y-6">
+                {[1, 2, 3].map(i => (
+                  <div key={i} className="animate-pulse p-6 border rounded-md">
+                    <div className="h-6 bg-muted rounded w-3/4 mb-4"></div>
+                    <div className="h-4 bg-muted rounded w-1/2 mb-4"></div>
+                    <div className="h-4 bg-muted rounded w-1/4"></div>
+                  </div>
+                ))}
+              </div>
+            ) : filteredProjects.length > 0 ? (
+              <div className="space-y-6">
+                <p className="text-muted-foreground mb-6">
+                  Showing {filteredProjects.length} {filteredProjects.length === 1 ? 'project' : 'projects'}
+                  {categoryFilter && ` in ${categoryFilter}`}
+                  {searchTerm && ` matching "${searchTerm}"`}
+                </p>
+                {filteredProjects.map((project, index) => (
+                  <div 
+                    key={project.id}
+                    className="animate-slide-up bg-white rounded-lg border overflow-hidden shadow-sm"
+                    style={{ animationDelay: `${index * 0.1}s` }}
+                  >
+                    <div className="p-6">
+                      <div className="flex items-start justify-between mb-3">
+                        <h3 className="text-xl font-serif font-semibold">{project.title}</h3>
+                        <span className={`text-xs px-2 py-1 rounded-full ${
+                          project.status === 'active' ? 'bg-green-100 text-green-800' :
+                          project.status === 'completed' ? 'bg-blue-100 text-blue-800' :
+                          'bg-yellow-100 text-yellow-800'
+                        }`}>
+                          {project.status.charAt(0).toUpperCase() + project.status.slice(1)}
+                        </span>
+                      </div>
+                      <p className="text-sm text-muted-foreground mb-3">{project.category}</p>
+                      
+                      <div className={`overflow-hidden transition-all duration-300 ${
+                        expandedId === project.id ? 'max-h-[2000px]' : 'max-h-24'
+                      }`}>
+                        <div 
+                          className="prose prose-sm max-w-none"
+                          dangerouslySetInnerHTML={{ __html: project.description }}
+                        />
+                      </div>
+                      
+                      <Button 
+                        variant="link" 
+                        onClick={() => toggleProjectExpansion(project.id)}
+                        className="mt-2 p-0 h-auto text-primary"
+                      >
+                        {expandedId === project.id ? 'Show Less' : 'Read More'}
+                      </Button>
+                    </div>
+                  </div>
+                ))}
               </div>
             ) : (
-              <div className="prose prose-lg max-w-none animate-fade-in">
-                <ReactMarkdown>
-                  {content}
-                </ReactMarkdown>
+              <div className="text-center py-16">
+                <p className="text-xl text-muted-foreground">
+                  No research projects found matching your criteria.
+                </p>
+                <button
+                  onClick={() => {
+                    setSearchTerm('');
+                    setCategoryFilter('');
+                  }}
+                  className="mt-4 px-4 py-2 border border-primary text-primary rounded-md hover:bg-accent transition-colors"
+                >
+                  Clear Filters
+                </button>
               </div>
             )}
-          </div>
-          
-          {/* Research Areas Visualization */}
-          <div className="max-w-5xl mx-auto mt-16">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              {researchAreas.map((area, index) => (
-                <div 
-                  key={index} 
-                  className="bg-white rounded-lg overflow-hidden border shadow-sm animate-slide-up"
-                  style={{ animationDelay: `${index * 0.2}s` }}
-                >
-                  <div className="h-48 overflow-hidden">
-                    <img 
-                      src={area.image} 
-                      alt={area.title}
-                      className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
-                    />
-                  </div>
-                  <div className="p-6">
-                    <h3 className="text-xl font-serif font-medium mb-3">{area.title}</h3>
-                    <p className="text-muted-foreground">{area.description}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
           </div>
         </div>
       </div>

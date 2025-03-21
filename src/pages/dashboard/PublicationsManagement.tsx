@@ -5,7 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
+import RichTextEditor from '@/components/ui/RichTextEditor';
 import { 
   Dialog, 
   DialogContent, 
@@ -148,6 +148,11 @@ const PublicationsManagement = () => {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
+  // Handle rich text editor changes
+  const handleAbstractChange = (content: string) => {
+    setFormData(prev => ({ ...prev, abstract: content }));
+  };
+
   // Handle form submission
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -209,7 +214,7 @@ const PublicationsManagement = () => {
               Add Publication
             </Button>
           </DialogTrigger>
-          <DialogContent className="sm:max-w-[550px]">
+          <DialogContent className="sm:max-w-[650px]">
             <DialogHeader>
               <DialogTitle>Add New Publication</DialogTitle>
             </DialogHeader>
@@ -275,14 +280,10 @@ const PublicationsManagement = () => {
               
               <div className="space-y-2">
                 <label htmlFor="abstract" className="text-sm font-medium">Abstract</label>
-                <Textarea
-                  id="abstract"
-                  name="abstract"
+                <RichTextEditor
+                  content={formData.abstract}
+                  onChange={handleAbstractChange}
                   placeholder="Publication abstract"
-                  value={formData.abstract}
-                  onChange={handleInputChange}
-                  rows={5}
-                  required
                 />
               </div>
               
@@ -312,7 +313,7 @@ const PublicationsManagement = () => {
 
       {/* Edit Publication Dialog */}
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent className="sm:max-w-[550px]">
+        <DialogContent className="sm:max-w-[650px]">
           <DialogHeader>
             <DialogTitle>Edit Publication</DialogTitle>
           </DialogHeader>
@@ -373,13 +374,9 @@ const PublicationsManagement = () => {
             
             <div className="space-y-2">
               <label htmlFor="edit-abstract" className="text-sm font-medium">Abstract</label>
-              <Textarea
-                id="edit-abstract"
-                name="abstract"
-                value={formData.abstract}
-                onChange={handleInputChange}
-                rows={5}
-                required
+              <RichTextEditor
+                content={formData.abstract}
+                onChange={handleAbstractChange}
               />
             </div>
             

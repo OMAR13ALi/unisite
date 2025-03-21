@@ -5,7 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
+import RichTextEditor from '@/components/ui/RichTextEditor';
 import { 
   Dialog, 
   DialogContent, 
@@ -19,7 +19,6 @@ import {
   Table, 
   TableBody, 
   TableCell,
-
   TableHead, 
   TableHeader, 
   TableRow 
@@ -137,6 +136,11 @@ const ResearchManagement = () => {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
+  // Handle rich text editor changes
+  const handleDescriptionChange = (content: string) => {
+    setFormData(prev => ({ ...prev, description: content }));
+  };
+
   // Handle form submission
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -192,7 +196,7 @@ const ResearchManagement = () => {
               Add Research Project
             </Button>
           </DialogTrigger>
-          <DialogContent className="sm:max-w-[550px]">
+          <DialogContent className="sm:max-w-[650px]">
             <DialogHeader>
               <DialogTitle>Add New Research Project</DialogTitle>
             </DialogHeader>
@@ -223,14 +227,10 @@ const ResearchManagement = () => {
               
               <div className="space-y-2">
                 <label htmlFor="description" className="text-sm font-medium">Description</label>
-                <Textarea
-                  id="description"
-                  name="description"
+                <RichTextEditor
+                  content={formData.description}
+                  onChange={handleDescriptionChange}
                   placeholder="Detailed description of the research project"
-                  value={formData.description}
-                  onChange={handleInputChange}
-                  rows={5}
-                  required
                 />
               </div>
               
@@ -264,7 +264,7 @@ const ResearchManagement = () => {
 
       {/* Edit Project Dialog */}
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent className="sm:max-w-[550px]">
+        <DialogContent className="sm:max-w-[650px]">
           <DialogHeader>
             <DialogTitle>Edit Research Project</DialogTitle>
           </DialogHeader>
@@ -293,13 +293,9 @@ const ResearchManagement = () => {
             
             <div className="space-y-2">
               <label htmlFor="edit-description" className="text-sm font-medium">Description</label>
-              <Textarea
-                id="edit-description"
-                name="description"
-                value={formData.description}
-                onChange={handleInputChange}
-                rows={5}
-                required
+              <RichTextEditor
+                content={formData.description}
+                onChange={handleDescriptionChange}
               />
             </div>
             

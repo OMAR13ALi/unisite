@@ -65,7 +65,10 @@ const PublicationCard: React.FC<PublicationCardProps> = ({
         {isExpanded && abstract && (
           <div className="mt-2 mb-4 text-foreground animate-fade-in">
             <h4 className="text-sm font-semibold mb-1">Abstract</h4>
-            <p className="text-sm">{abstract}</p>
+            <div 
+              className="text-sm prose prose-sm max-w-none"
+              dangerouslySetInnerHTML={{ __html: abstract }}
+            />
           </div>
         )}
         
