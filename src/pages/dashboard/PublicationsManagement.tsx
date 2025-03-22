@@ -156,36 +156,40 @@ const PublicationsManagement = () => {
               Add Publication
             </Button>
           </DialogTrigger>
-          <DialogContent className="sm:max-w-[650px]">
-            <DialogHeader>
+          <DialogContent className="sm:max-w-[650px] max-h-[85vh] p-0">
+            <DialogHeader className="px-6 pt-6 pb-0">
               <DialogTitle>Add New Publication</DialogTitle>
             </DialogHeader>
-            <PublicationForm 
-              formData={formData}
-              selectedPublication={null}
-              handleInputChange={handleInputChange}
-              handleAbstractChange={handleAbstractChange}
-              handleSubmit={handleSubmit}
-              resetForm={resetForm}
-            />
+            <div className="px-6 py-2 flex-1 h-full">
+              <PublicationForm 
+                formData={formData}
+                selectedPublication={null}
+                handleInputChange={handleInputChange}
+                handleAbstractChange={handleAbstractChange}
+                handleSubmit={handleSubmit}
+                resetForm={resetForm}
+              />
+            </div>
           </DialogContent>
         </Dialog>
       </div>
 
       {/* Edit Publication Dialog */}
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent className="sm:max-w-[650px]">
-          <DialogHeader>
+        <DialogContent className="sm:max-w-[650px] max-h-[85vh] p-0">
+          <DialogHeader className="px-6 pt-6 pb-0">
             <DialogTitle>Edit Publication</DialogTitle>
           </DialogHeader>
-          <PublicationForm 
-            formData={formData}
-            selectedPublication={selectedPublication}
-            handleInputChange={handleInputChange}
-            handleAbstractChange={handleAbstractChange}
-            handleSubmit={handleSubmit}
-            resetForm={() => setIsEditDialogOpen(false)}
-          />
+          <div className="px-6 py-2 flex-1 h-full">
+            <PublicationForm 
+              formData={formData}
+              selectedPublication={selectedPublication}
+              handleInputChange={handleInputChange}
+              handleAbstractChange={handleAbstractChange}
+              handleSubmit={handleSubmit}
+              resetForm={() => setIsEditDialogOpen(false)}
+            />
+          </div>
         </DialogContent>
       </Dialog>
 

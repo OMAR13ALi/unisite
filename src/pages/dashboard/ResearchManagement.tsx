@@ -147,36 +147,40 @@ const ResearchManagement = () => {
               Add Research Project
             </Button>
           </DialogTrigger>
-          <DialogContent className="sm:max-w-[650px]">
-            <DialogHeader>
+          <DialogContent className="sm:max-w-[650px] max-h-[85vh] p-0">
+            <DialogHeader className="px-6 pt-6 pb-0">
               <DialogTitle>Add New Research Project</DialogTitle>
             </DialogHeader>
-            <ProjectForm 
-              formData={formData}
-              selectedProject={null}
-              handleInputChange={handleInputChange}
-              handleDescriptionChange={handleDescriptionChange}
-              handleSubmit={handleSubmit}
-              resetForm={resetForm}
-            />
+            <div className="px-6 py-2 flex-1 h-full">
+              <ProjectForm 
+                formData={formData}
+                selectedProject={null}
+                handleInputChange={handleInputChange}
+                handleDescriptionChange={handleDescriptionChange}
+                handleSubmit={handleSubmit}
+                resetForm={resetForm}
+              />
+            </div>
           </DialogContent>
         </Dialog>
       </div>
 
       {/* Edit Project Dialog */}
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent className="sm:max-w-[650px]">
-          <DialogHeader>
+        <DialogContent className="sm:max-w-[650px] max-h-[85vh] p-0">
+          <DialogHeader className="px-6 pt-6 pb-0">
             <DialogTitle>Edit Research Project</DialogTitle>
           </DialogHeader>
-          <ProjectForm 
-            formData={formData}
-            selectedProject={selectedProject}
-            handleInputChange={handleInputChange}
-            handleDescriptionChange={handleDescriptionChange}
-            handleSubmit={handleSubmit}
-            resetForm={() => setIsEditDialogOpen(false)}
-          />
+          <div className="px-6 py-2 flex-1 h-full">
+            <ProjectForm 
+              formData={formData}
+              selectedProject={selectedProject}
+              handleInputChange={handleInputChange}
+              handleDescriptionChange={handleDescriptionChange}
+              handleSubmit={handleSubmit}
+              resetForm={() => setIsEditDialogOpen(false)}
+            />
+          </div>
         </DialogContent>
       </Dialog>
 

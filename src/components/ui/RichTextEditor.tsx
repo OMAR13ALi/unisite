@@ -24,7 +24,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({ content, onChange, plac
     },
     editorProps: {
       attributes: {
-        class: 'prose prose-sm sm:prose p-4 focus:outline-none min-h-[200px] max-w-none',
+        class: 'prose prose-sm sm:prose p-4 focus:outline-none min-h-[150px] max-w-none',
       },
     }
   });
@@ -35,7 +35,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({ content, onChange, plac
 
   return (
     <div className="border rounded-md overflow-hidden">
-      <div className="flex flex-wrap gap-1 p-2 border-b bg-muted/50">
+      <div className="flex flex-wrap gap-1 p-2 border-b bg-muted/50 sticky top-0 z-10">
         <Button 
           type="button" 
           variant="ghost" 
@@ -115,7 +115,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({ content, onChange, plac
           <Quote size={16} />
         </Button>
       </div>
-      <EditorContent editor={editor} className="min-h-[200px]" />
+      <EditorContent editor={editor} className="max-h-[150px] overflow-y-auto" />
     </div>
   );
 };
