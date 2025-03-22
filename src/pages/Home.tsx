@@ -64,6 +64,13 @@ const fetchResearchHighlights = async () => {
   return data || [];
 };
 
+// Helper function to strip HTML tags safely
+const stripHtml = (html: string) => {
+  const temp = document.createElement('div');
+  temp.innerHTML = html;
+  return temp.textContent || temp.innerText || '';
+};
+
 const Home = () => {
   // Fetch data using React Query
   const { data: professor } = useQuery({
@@ -88,11 +95,15 @@ const Home = () => {
 
   // Format research areas for display
   const researchAreas = researchProjects.length > 0 
-    ? researchProjects.map((project, index) => ({
-        title: project.title,
-        description: project.description.substring(0, 100) + (project.description.length > 100 ? '...' : ''),
-        delay: `${index * 0.2}s`
-      }))
+    ? researchProjects.map((project, index) => {
+        // Strip HTML tags from description for summary display
+        const plainDescription = stripHtml(project.description);
+        return {
+          title: project.title,
+          description: plainDescription.substring(0, 100) + (plainDescription.length > 100 ? '...' : ''),
+          delay: `${index * 0.2}s`
+        };
+      })
     : [
         {
           title: "Quantum Computing",

@@ -29,9 +29,16 @@ export const createPublication = async (newPublication: Omit<Publication, 'id' |
   // Convert comma-separated authors to array
   const authorArray = newPublication.authors.split(',').map(author => author.trim());
   
+  // Clean HTML content if needed
+  const cleanedAbstract = newPublication.abstract || '';
+  
   const { data, error } = await supabase
     .from('publications')
-    .insert([{ ...newPublication, authors: authorArray }])
+    .insert([{ 
+      ...newPublication, 
+      authors: authorArray,
+      abstract: cleanedAbstract
+    }])
     .select();
   
   if (error) throw error;
@@ -43,9 +50,16 @@ export const updatePublication = async ({ id, ...publication }: { id: string } &
   // Convert comma-separated authors to array
   const authorArray = publication.authors.split(',').map(author => author.trim());
   
+  // Clean HTML content if needed
+  const cleanedAbstract = publication.abstract || '';
+  
   const { data, error } = await supabase
     .from('publications')
-    .update({ ...publication, authors: authorArray })
+    .update({ 
+      ...publication, 
+      authors: authorArray,
+      abstract: cleanedAbstract
+    })
     .eq('id', id)
     .select();
   

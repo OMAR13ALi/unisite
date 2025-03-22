@@ -60,7 +60,7 @@ const ProjectForm: React.FC<ProjectFormProps> = ({
       <div className="space-y-2">
         <label htmlFor="description" className="text-sm font-medium">Description</label>
         <RichTextEditor
-          content={formData.description}
+          content={formData.description || ''}
           onChange={handleDescriptionChange}
           placeholder="Detailed description of the research project"
         />

@@ -16,9 +16,11 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({ content, onChange, plac
     extensions: [
       StarterKit
     ],
-    content,
+    content: content || '',
     onUpdate: ({ editor }) => {
-      onChange(editor.getHTML());
+      // Get HTML content without wrapper div
+      const html = editor.getHTML();
+      onChange(html);
     },
     editorProps: {
       attributes: {
