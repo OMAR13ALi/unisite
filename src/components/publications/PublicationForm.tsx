@@ -90,7 +90,7 @@ const PublicationForm: React.FC<PublicationFormProps> = ({
           id="doi"
           name="doi"
           placeholder="https://doi.org/10.xxxx/xxxxx"
-          value={formData.doi}
+          value={formData.doi || ''}
           onChange={handleInputChange}
         />
       </div>
@@ -98,7 +98,7 @@ const PublicationForm: React.FC<PublicationFormProps> = ({
       <div className="space-y-2">
         <label htmlFor="abstract" className="text-sm font-medium">Abstract</label>
         <RichTextEditor
-          content={formData.abstract}
+          content={formData.abstract || ''}
           onChange={handleAbstractChange}
           placeholder="Publication abstract"
         />
@@ -110,7 +110,7 @@ const PublicationForm: React.FC<PublicationFormProps> = ({
           id="pdf_url"
           name="pdf_url"
           placeholder="https://example.com/paper.pdf"
-          value={formData.pdf_url}
+          value={formData.pdf_url || ''}
           onChange={handleInputChange}
         />
       </div>

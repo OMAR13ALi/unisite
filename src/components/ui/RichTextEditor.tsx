@@ -76,7 +76,10 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({ content, onChange, plac
           type="button" 
           variant="ghost" 
           size="sm" 
-          onClick={() => editor.chain().focus().toggleBulletList().run()}
+          onClick={() => {
+            console.log("Toggling bullet list");
+            editor.chain().focus().toggleBulletList().run();
+          }}
           className={editor.isActive('bulletList') ? 'bg-accent' : ''}
         >
           <List size={16} />
@@ -85,7 +88,10 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({ content, onChange, plac
           type="button" 
           variant="ghost" 
           size="sm" 
-          onClick={() => editor.chain().focus().toggleOrderedList().run()}
+          onClick={() => {
+            console.log("Toggling ordered list");
+            editor.chain().focus().toggleOrderedList().run();
+          }}
           className={editor.isActive('orderedList') ? 'bg-accent' : ''}
         >
           <ListOrdered size={16} />
