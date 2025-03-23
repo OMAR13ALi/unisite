@@ -60,6 +60,24 @@ export const deleteCourse = async (id: string) => {
   if (error) throw error;
 };
 
+// Detect file type from extension
+export const detectFileType = (fileName: string): string => {
+  const extension = fileName.split('.').pop()?.toLowerCase() || '';
+  
+  // Video files
+  if (['mp4', 'webm', 'mov', 'avi', 'mkv'].includes(extension)) {
+    return 'video';
+  }
+  
+  // PDF files
+  if (extension === 'pdf') {
+    return 'pdf';
+  }
+  
+  // Return original type if not detected
+  return 'other';
+};
+
 // Upload a material
 export interface UploadMaterialParams {
   courseId: string;
@@ -81,6 +99,10 @@ export const uploadMaterial = async ({
   const fileName = `${Math.random().toString(36).substring(2, 15)}_${Math.random().toString(36).substring(2, 15)}.${fileExt}`;
   const filePath = `${courseId}/${type}/${fileName}`;
   
+  // Detect file type from extension if needed
+  const detectedType = detectFileType(file.name);
+  const materialType = type === 'other' ? detectedType : type;
+  
   const { error: uploadError } = await supabase.storage
     .from('course_materials')
     .upload(filePath, file);
@@ -98,7 +120,7 @@ export const uploadMaterial = async ({
     .insert([{
       course_id: courseId,
       title,
-      type,
+      type: materialType,
       description: description || null,
       file_path: fileData.publicUrl
     }])

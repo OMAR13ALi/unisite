@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import PageTransition from '@/components/layout/PageTransition';
 import ReactMarkdown from 'react-markdown';
-import { Bookmark, FileText, Book, Calendar, ListChecks, BookOpen } from 'lucide-react';
+import { Bookmark, FileText, Book, Calendar, ListChecks, BookOpen, Video } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useQuery } from '@tanstack/react-query';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -108,10 +108,61 @@ const getMaterialTypeIcon = (type: string) => {
     case 'exam':
       return <Calendar className="h-6 w-6 text-primary shrink-0 mt-1" />;
     case 'video':
-      return <FileText className="h-6 w-6 text-primary shrink-0 mt-1" />;
+      return <Video className="h-6 w-6 text-primary shrink-0 mt-1" />;
     default:
       return <FileText className="h-6 w-6 text-primary shrink-0 mt-1" />;
   }
+};
+
+// Check if file is a video
+const isVideoFile = (filePath: string): boolean => {
+  const videoExtensions = ['.mp4', '.webm', '.mov', '.avi', '.mkv'];
+  return videoExtensions.some(ext => filePath.toLowerCase().endsWith(ext));
+};
+
+// Render material content based on type
+const renderMaterialContent = (material: any) => {
+  if (material.type === 'video' || isVideoFile(material.file_path)) {
+    return (
+      <a 
+        key={material.id}
+        href={material.file_path}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="bg-accent/20 rounded-lg p-4 hover:bg-accent/30 transition-colors"
+      >
+        <div className="flex items-start gap-3">
+          <Video className="h-6 w-6 text-primary shrink-0 mt-1" />
+          <div>
+            <h5 className="font-medium">{material.title}</h5>
+            {material.description && (
+              <p className="text-sm text-muted-foreground mt-1">{material.description}</p>
+            )}
+          </div>
+        </div>
+      </a>
+    );
+  }
+  
+  return (
+    <a 
+      key={material.id}
+      href={material.file_path}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="bg-accent/20 rounded-lg p-4 hover:bg-accent/30 transition-colors"
+    >
+      <div className="flex items-start gap-3">
+        {getMaterialTypeIcon(material.type)}
+        <div>
+          <h5 className="font-medium">{material.title}</h5>
+          {material.description && (
+            <p className="text-sm text-muted-foreground mt-1">{material.description}</p>
+          )}
+        </div>
+      </div>
+    </a>
+  );
 };
 
 const Teaching = () => {
@@ -211,6 +262,9 @@ const Teaching = () => {
     return acc;
   }, {} as Record<string, any[]>);
 
+  // Add videos tab if there are videos
+  const hasVideos = materialsData.some(material => material.type === 'video' || isVideoFile(material.file_path));
+
   // Get the selected course details
   const selectedCourseDetails = selectedCourse 
     ? courses.find(course => course.id === selectedCourse) 
@@ -255,7 +309,7 @@ const Teaching = () => {
                 </div>
                 
                 <Tabs defaultValue="syllabus" className="w-full">
-                  <TabsList className="grid w-full grid-cols-4">
+                  <TabsList className="grid w-full" style={{ gridTemplateColumns: `repeat(${hasVideos ? 5 : 4}, 1fr)` }}>
                     <TabsTrigger value="syllabus">
                       <BookOpen className="h-4 w-4 mr-2" />
                       Syllabus
@@ -272,6 +326,12 @@ const Teaching = () => {
                       <Calendar className="h-4 w-4 mr-2" />
                       Exams
                     </TabsTrigger>
+                    {hasVideos && (
+                      <TabsTrigger value="videos">
+                        <Video className="h-4 w-4 mr-2" />
+                        Videos
+                      </TabsTrigger>
+                    )}
                   </TabsList>
                   
                   {/* Syllabus Tab */}
@@ -287,25 +347,7 @@ const Teaching = () => {
                       </div>
                     ) : (
                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        {groupedMaterials.syllabus?.map(material => (
-                          <a 
-                            key={material.id}
-                            href={material.file_path}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="bg-accent/20 rounded-lg p-4 hover:bg-accent/30 transition-colors"
-                          >
-                            <div className="flex items-start gap-3">
-                              <BookOpen className="h-6 w-6 text-primary shrink-0 mt-1" />
-                              <div>
-                                <h5 className="font-medium">{material.title}</h5>
-                                {material.description && (
-                                  <p className="text-sm text-muted-foreground mt-1">{material.description}</p>
-                                )}
-                              </div>
-                            </div>
-                          </a>
-                        ))}
+                        {groupedMaterials.syllabus?.map(material => renderMaterialContent(material))}
                       </div>
                     )}
                   </TabsContent>
@@ -323,25 +365,7 @@ const Teaching = () => {
                       </div>
                     ) : (
                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        {groupedMaterials.pdf?.map(material => (
-                          <a 
-                            key={material.id}
-                            href={material.file_path}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="bg-accent/20 rounded-lg p-4 hover:bg-accent/30 transition-colors"
-                          >
-                            <div className="flex items-start gap-3">
-                              <FileText className="h-6 w-6 text-primary shrink-0 mt-1" />
-                              <div>
-                                <h5 className="font-medium">{material.title}</h5>
-                                {material.description && (
-                                  <p className="text-sm text-muted-foreground mt-1">{material.description}</p>
-                                )}
-                              </div>
-                            </div>
-                          </a>
-                        ))}
+                        {groupedMaterials.pdf?.map(material => renderMaterialContent(material))}
                       </div>
                     )}
                   </TabsContent>
@@ -359,25 +383,7 @@ const Teaching = () => {
                       </div>
                     ) : (
                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        {groupedMaterials.assignment?.map(material => (
-                          <a 
-                            key={material.id}
-                            href={material.file_path}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="bg-accent/20 rounded-lg p-4 hover:bg-accent/30 transition-colors"
-                          >
-                            <div className="flex items-start gap-3">
-                              <ListChecks className="h-6 w-6 text-primary shrink-0 mt-1" />
-                              <div>
-                                <h5 className="font-medium">{material.title}</h5>
-                                {material.description && (
-                                  <p className="text-sm text-muted-foreground mt-1">{material.description}</p>
-                                )}
-                              </div>
-                            </div>
-                          </a>
-                        ))}
+                        {groupedMaterials.assignment?.map(material => renderMaterialContent(material))}
                       </div>
                     )}
                   </TabsContent>
@@ -395,28 +401,36 @@ const Teaching = () => {
                       </div>
                     ) : (
                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        {groupedMaterials.exam?.map(material => (
-                          <a 
-                            key={material.id}
-                            href={material.file_path}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="bg-accent/20 rounded-lg p-4 hover:bg-accent/30 transition-colors"
-                          >
-                            <div className="flex items-start gap-3">
-                              <Calendar className="h-6 w-6 text-primary shrink-0 mt-1" />
-                              <div>
-                                <h5 className="font-medium">{material.title}</h5>
-                                {material.description && (
-                                  <p className="text-sm text-muted-foreground mt-1">{material.description}</p>
-                                )}
-                              </div>
-                            </div>
-                          </a>
-                        ))}
+                        {groupedMaterials.exam?.map(material => renderMaterialContent(material))}
                       </div>
                     )}
                   </TabsContent>
+                  
+                  {/* Videos Tab */}
+                  {hasVideos && (
+                    <TabsContent value="videos" className="mt-6">
+                      {isLoadingMaterials ? (
+                        <div className="flex justify-center items-center h-40">
+                          <div className="animate-spin h-8 w-8 border-4 border-primary border-r-transparent rounded-full"></div>
+                        </div>
+                      ) : !groupedMaterials.video || (groupedMaterials.video?.length === 0 && !materialsData.some(m => m.type !== 'video' && isVideoFile(m.file_path))) ? (
+                        <div className="text-center py-10 text-muted-foreground">
+                          <Video className="h-12 w-12 mx-auto mb-3 opacity-30" />
+                          <p>No video materials available for this course yet.</p>
+                        </div>
+                      ) : (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                          {/* Display videos with type 'video' */}
+                          {groupedMaterials.video?.map(material => renderMaterialContent(material))}
+                          
+                          {/* Also display videos with file extensions that indicate video */}
+                          {Object.entries(groupedMaterials).map(([type, materials]) => 
+                            type !== 'video' ? materials.filter(m => isVideoFile(m.file_path)).map(material => renderMaterialContent(material)) : null
+                          )}
+                        </div>
+                      )}
+                    </TabsContent>
+                  )}
                 </Tabs>
               </div>
             ) : (

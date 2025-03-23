@@ -69,6 +69,39 @@ const MaterialsView: React.FC<MaterialsViewProps> = ({
     return acc;
   }, {} as Record<string, Material[]>) : {};
 
+  // Check if material is a video file
+  const isVideoFile = (filePath: string): boolean => {
+    const videoExtensions = ['.mp4', '.webm', '.mov', '.avi', '.mkv'];
+    return videoExtensions.some(ext => filePath.toLowerCase().endsWith(ext));
+  };
+
+  // Render material content based on type
+  const renderMaterialContent = (material: Material) => {
+    if (material.type === 'video' || isVideoFile(material.file_path)) {
+      return (
+        <a 
+          href={material.file_path} 
+          target="_blank" 
+          rel="noopener noreferrer"
+          className="text-primary text-sm hover:underline"
+        >
+          View Video
+        </a>
+      );
+    }
+    
+    return (
+      <a 
+        href={material.file_path} 
+        target="_blank" 
+        rel="noopener noreferrer"
+        className="text-primary text-sm hover:underline"
+      >
+        View Material
+      </a>
+    );
+  };
+
   return (
     <div className="space-y-6">
       <div className="bg-accent/20 p-4 rounded-md">
@@ -136,14 +169,7 @@ const MaterialsView: React.FC<MaterialsViewProps> = ({
                 </p>
               </CardContent>
               <CardFooter className="flex justify-between border-t pt-4">
-                <a 
-                  href={material.file_path} 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="text-primary text-sm hover:underline"
-                >
-                  View Material
-                </a>
+                {renderMaterialContent(material)}
                 <Button 
                   variant="ghost" 
                   size="sm"
@@ -177,14 +203,7 @@ const MaterialsView: React.FC<MaterialsViewProps> = ({
                       </p>
                     </CardContent>
                     <CardFooter className="flex justify-between border-t pt-4">
-                      <a 
-                        href={material.file_path} 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className="text-primary text-sm hover:underline"
-                      >
-                        View Material
-                      </a>
+                      {renderMaterialContent(material)}
                       <Button 
                         variant="ghost" 
                         size="sm"
