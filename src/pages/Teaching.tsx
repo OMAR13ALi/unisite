@@ -425,7 +425,7 @@ const Teaching = () => {
                           
                           {/* Also display videos with file extensions that indicate video */}
                           {Object.entries(groupedMaterials).map(([type, materials]) => 
-                            type !== 'video' ? materials.filter(m => isVideoFile(m.file_path)).map(material => renderMaterialContent(material)) : null
+                            type !== 'video' ? (materials as any[]).filter(m => isVideoFile(m.file_path)).map(material => renderMaterialContent(material)) : null
                           )}
                         </div>
                       )}
