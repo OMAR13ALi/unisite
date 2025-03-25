@@ -40,17 +40,17 @@ const PublicationCard: React.FC<PublicationCardProps> = ({
   });
 
   return (
-    <div className="group mb-6 p-6 border rounded-md bg-white transition-all duration-300 hover:shadow-sm">
-      <div className="flex flex-col">
-        {cover_image_url && (
-          <div className="mb-4 -m-6 p-0">
-            <img 
-              src={cover_image_url} 
-              alt={title} 
-              className="w-full h-48 object-cover rounded-t-md" 
-            />
-          </div>
-        )}
+    <div className="group mb-6 border rounded-md bg-white transition-all duration-300 hover:shadow-sm overflow-hidden">
+      {cover_image_url && (
+        <div className="w-full h-48 overflow-hidden">
+          <img 
+            src={cover_image_url} 
+            alt={title} 
+            className="w-full h-full object-cover" 
+          />
+        </div>
+      )}
+      <div className="p-6">
         <div className="mb-2">
           <button 
             onClick={onToggleExpand}

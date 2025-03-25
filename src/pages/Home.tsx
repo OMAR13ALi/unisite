@@ -99,23 +99,28 @@ const Home = () => {
         // Strip HTML tags from description for summary display
         const plainDescription = stripHtml(project.description);
         return {
+          id: project.id,
           title: project.title,
           description: plainDescription.substring(0, 100) + (plainDescription.length > 100 ? '...' : ''),
+          cover_image_url: project.cover_image_url,
           delay: `${index * 0.2}s`
         };
       })
     : [
         {
+          id: "demo-1",
           title: "Quantum Computing",
           description: "Developing quantum algorithms for machine learning and optimization problems.",
           delay: "0s"
         },
         {
+          id: "demo-2",
           title: "Ethical AI",
           description: "Creating frameworks for responsible AI development and deployment.",
           delay: "0.2s"
         },
         {
+          id: "demo-3",
           title: "Distributed Systems",
           description: "Building efficient AI models for edge computing and federated learning.",
           delay: "0.4s"
@@ -129,6 +134,7 @@ const Home = () => {
         title: course.title,
         term: `${course.semester} ${course.year}`,
         description: course.description.substring(0, 100) + (course.description.length > 100 ? '...' : ''),
+        cover_image_url: course.cover_image_url,
         delay: `${index * 0.2}s`
       }))
     : [
@@ -162,6 +168,7 @@ const Home = () => {
         authors: Array.isArray(pub.authors) ? pub.authors.join(', ') : pub.authors,
         venue: pub.venue,
         year: pub.date,
+        cover_image_url: pub.cover_image_url,
         delay: `${index * 0.2}s`
       }))
     : [
@@ -252,18 +259,29 @@ const Home = () => {
               {researchAreas.map((item, index) => (
                 <div 
                   key={index}
-                  className="bg-white p-8 rounded-lg border animate-slide-up shadow-sm"
+                  className="bg-white rounded-lg border overflow-hidden animate-slide-up shadow-sm"
                   style={{ animationDelay: item.delay }}
                 >
-                  <h3 className="text-xl font-serif font-medium mb-4">{item.title}</h3>
-                  <p className="text-muted-foreground mb-6">{item.description}</p>
-                  <Link 
-                    to="/research" 
-                    className="text-primary hover-underline-animation inline-flex items-center gap-1"
-                  >
-                    <span>Learn more</span>
-                    <ArrowRight size={16} />
-                  </Link>
+                  {item.cover_image_url && (
+                    <div className="h-40 w-full overflow-hidden">
+                      <img 
+                        src={item.cover_image_url} 
+                        alt={item.title}
+                        className="w-full h-full object-cover" 
+                      />
+                    </div>
+                  )}
+                  <div className="p-6">
+                    <h3 className="text-xl font-serif font-medium mb-4">{item.title}</h3>
+                    <p className="text-muted-foreground mb-6">{item.description}</p>
+                    <Link 
+                      to="/research" 
+                      className="text-primary hover-underline-animation inline-flex items-center gap-1"
+                    >
+                      <span>Learn more</span>
+                      <ArrowRight size={16} />
+                    </Link>
+                  </div>
                 </div>
               ))}
             </div>
@@ -283,15 +301,26 @@ const Home = () => {
               {recentPublications.map((pub, index) => (
                 <div 
                   key={index} 
-                  className="p-6 border rounded-md bg-white animate-slide-up shadow-sm"
+                  className="overflow-hidden border rounded-md bg-white animate-slide-up shadow-sm"
                   style={{ animationDelay: pub.delay }}
                 >
-                  <h3 className="text-xl font-semibold font-serif mb-2">{pub.title}</h3>
-                  <p className="text-muted-foreground mb-2">{pub.authors}</p>
-                  <div className="text-sm text-muted-foreground">
-                    <span>{pub.venue}</span>
-                    <span className="mx-2">•</span>
-                    <span>{pub.year}</span>
+                  {pub.cover_image_url && (
+                    <div className="h-40 w-full">
+                      <img 
+                        src={pub.cover_image_url} 
+                        alt={pub.title} 
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  )}
+                  <div className="p-6">
+                    <h3 className="text-xl font-semibold font-serif mb-2">{pub.title}</h3>
+                    <p className="text-muted-foreground mb-2">{pub.authors}</p>
+                    <div className="text-sm text-muted-foreground">
+                      <span>{pub.venue}</span>
+                      <span className="mx-2">•</span>
+                      <span>{pub.year}</span>
+                    </div>
                   </div>
                 </div>
               ))}
@@ -318,25 +347,36 @@ const Home = () => {
               {displayCourses.map((course, index) => (
                 <div 
                   key={index} 
-                  className="bg-white p-8 rounded-lg border animate-slide-up shadow-sm"
+                  className="bg-white rounded-lg border overflow-hidden animate-slide-up shadow-sm"
                   style={{ animationDelay: course.delay }}
                 >
-                  <div className="mb-4">
-                    <span className="text-sm font-medium bg-muted px-3 py-1 rounded-full">
-                      {course.term}
-                    </span>
+                  {course.cover_image_url && (
+                    <div className="h-40 w-full overflow-hidden">
+                      <img 
+                        src={course.cover_image_url} 
+                        alt={course.title}
+                        className="w-full h-full object-cover" 
+                      />
+                    </div>
+                  )}
+                  <div className="p-6">
+                    <div className="mb-4">
+                      <span className="text-sm font-medium bg-muted px-3 py-1 rounded-full">
+                        {course.term}
+                      </span>
+                    </div>
+                    <h3 className="text-xl font-serif font-medium mb-2">
+                      {course.code}: {course.title}
+                    </h3>
+                    <p className="text-muted-foreground mb-6">{course.description}</p>
+                    <Link 
+                      to="/teaching" 
+                      className="text-primary hover-underline-animation inline-flex items-center gap-1"
+                    >
+                      <span>Course details</span>
+                      <ArrowRight size={16} />
+                    </Link>
                   </div>
-                  <h3 className="text-xl font-serif font-medium mb-2">
-                    {course.code}: {course.title}
-                  </h3>
-                  <p className="text-muted-foreground mb-6">{course.description}</p>
-                  <Link 
-                    to="/teaching" 
-                    className="text-primary hover-underline-animation inline-flex items-center gap-1"
-                  >
-                    <span>Course details</span>
-                    <ArrowRight size={16} />
-                  </Link>
                 </div>
               ))}
             </div>

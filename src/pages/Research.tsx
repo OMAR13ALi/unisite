@@ -5,16 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useQuery } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { Filter, Search } from 'lucide-react';
-
-// Types
-interface ResearchProject {
-  id: string;
-  title: string;
-  description: string;
-  category: string;
-  status: string;
-  created_at: string;
-}
+import { ResearchProject } from '@/services/researchService';
 
 // Fetch research projects
 const fetchResearchProjects = async () => {
@@ -146,6 +137,15 @@ const Research = () => {
                     className="animate-slide-up bg-white rounded-lg border overflow-hidden shadow-sm"
                     style={{ animationDelay: `${index * 0.1}s` }}
                   >
+                    {project.cover_image_url && (
+                      <div className="w-full h-48 overflow-hidden">
+                        <img 
+                          src={project.cover_image_url} 
+                          alt={project.title}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                    )}
                     <div className="p-6">
                       <div className="flex items-start justify-between mb-3">
                         <h3 className="text-xl font-serif font-semibold">{project.title}</h3>
