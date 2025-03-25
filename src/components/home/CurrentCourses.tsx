@@ -27,19 +27,23 @@ const CurrentCourses: React.FC<CurrentCoursesProps> = ({ courses }) => {
           {courses.map((course, index) => (
             <div 
               key={index} 
-              className="bg-white rounded-lg border overflow-hidden animate-slide-up shadow-sm"
+              className="bg-white rounded-lg border overflow-hidden animate-slide-up shadow-sm h-full flex flex-col"
               style={{ animationDelay: course.delay }}
             >
-              {course.cover_image_url && (
-                <div className="h-40 w-full overflow-hidden">
+              {course.cover_image_url ? (
+                <div className="h-48 w-full overflow-hidden">
                   <img 
                     src={course.cover_image_url} 
                     alt={course.title}
                     className="w-full h-full object-cover" 
                   />
                 </div>
+              ) : (
+                <div className="h-48 w-full bg-gradient-to-r from-primary/10 to-secondary/10 flex items-center justify-center">
+                  <span className="text-3xl font-serif font-medium text-primary/40">{course.code}</span>
+                </div>
               )}
-              <div className="p-6">
+              <div className="p-6 flex-1 flex flex-col">
                 <div className="mb-4">
                   <span className="text-sm font-medium bg-muted px-3 py-1 rounded-full">
                     {course.term}
@@ -48,10 +52,10 @@ const CurrentCourses: React.FC<CurrentCoursesProps> = ({ courses }) => {
                 <h3 className="text-xl font-serif font-medium mb-2">
                   {course.code}: {course.title}
                 </h3>
-                <p className="text-muted-foreground mb-6">{course.description}</p>
+                <p className="text-muted-foreground mb-6 flex-1">{course.description}</p>
                 <Link 
                   to="/teaching" 
-                  className="text-primary hover-underline-animation inline-flex items-center gap-1"
+                  className="text-primary hover-underline-animation inline-flex items-center gap-1 mt-auto"
                 >
                   <span>Course details</span>
                   <ArrowRight size={16} />

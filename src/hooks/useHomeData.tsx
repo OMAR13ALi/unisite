@@ -44,7 +44,12 @@ export const fetchActiveCourses = async () => {
     .limit(3);
   
   if (error) throw error;
-  return data || [];
+  
+  // Make sure we have all needed fields including cover_image_url
+  return (data || []).map(course => ({
+    ...course,
+    cover_image_url: course.cover_image_url || undefined
+  }));
 };
 
 // Function to fetch research highlights

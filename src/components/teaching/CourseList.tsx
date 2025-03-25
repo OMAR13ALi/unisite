@@ -58,8 +58,8 @@ const CourseList: React.FC<CourseListProps> = ({
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
       {courses.map((course) => (
-        <Card key={course.id} className="overflow-hidden">
-          {course.cover_image_url && (
+        <Card key={course.id} className="overflow-hidden h-full flex flex-col">
+          {course.cover_image_url ? (
             <div className="h-48 w-full overflow-hidden">
               <img 
                 src={course.cover_image_url} 
@@ -67,8 +67,12 @@ const CourseList: React.FC<CourseListProps> = ({
                 className="w-full h-full object-cover"
               />
             </div>
+          ) : (
+            <div className="h-48 w-full bg-gradient-to-r from-primary/10 to-secondary/10 flex items-center justify-center">
+              <span className="text-3xl font-serif font-medium text-primary/40">{course.code}</span>
+            </div>
           )}
-          <CardHeader className={`${course.cover_image_url ? '' : 'bg-accent/30'} pb-2`}>
+          <CardHeader className="pb-2 flex-shrink-0">
             <div className="flex justify-between items-start">
               <CardTitle className="text-lg">{course.code}</CardTitle>
               <span className={`text-xs px-2 py-1 rounded-full ${
@@ -82,10 +86,10 @@ const CourseList: React.FC<CourseListProps> = ({
             <p className="text-base font-medium">{course.title}</p>
             <p className="text-sm text-muted-foreground">{course.semester} {course.year}</p>
           </CardHeader>
-          <CardContent className="pt-4">
+          <CardContent className="pt-4 flex-1">
             <p className="text-sm line-clamp-3">{course.description}</p>
           </CardContent>
-          <CardFooter className="flex justify-between border-t pt-4">
+          <CardFooter className="flex justify-between border-t pt-4 flex-shrink-0">
             <Button variant="outline" size="sm" onClick={() => onSelectCourse(course)}>
               Manage Materials
             </Button>
