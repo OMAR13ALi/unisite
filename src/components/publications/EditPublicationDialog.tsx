@@ -17,6 +17,7 @@ interface EditPublicationDialogProps {
   selectedPublication: Publication | null;
   handleInputChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
   handleAbstractChange: (content: string) => void;
+  handleImageUpload: (url: string) => void;
   handleSubmit: (e: React.FormEvent) => void;
 }
 
@@ -27,6 +28,7 @@ const EditPublicationDialog: React.FC<EditPublicationDialogProps> = ({
   selectedPublication,
   handleInputChange,
   handleAbstractChange,
+  handleImageUpload,
   handleSubmit
 }) => {
   return (
@@ -41,6 +43,7 @@ const EditPublicationDialog: React.FC<EditPublicationDialogProps> = ({
             selectedPublication={selectedPublication}
             handleInputChange={handleInputChange}
             handleAbstractChange={handleAbstractChange}
+            handleImageUpload={handleImageUpload}
             handleSubmit={handleSubmit}
             resetForm={() => setIsOpen(false)}
           />

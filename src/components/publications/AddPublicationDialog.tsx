@@ -16,6 +16,7 @@ interface AddPublicationDialogProps {
   formData: PublicationFormData;
   handleInputChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
   handleAbstractChange: (content: string) => void;
+  handleImageUpload: (url: string) => void;
   handleSubmit: (e: React.FormEvent) => void;
   resetForm: () => void;
 }
@@ -24,6 +25,7 @@ const AddPublicationDialog: React.FC<AddPublicationDialogProps> = ({
   formData,
   handleInputChange,
   handleAbstractChange,
+  handleImageUpload,
   handleSubmit,
   resetForm
 }) => {
@@ -45,6 +47,7 @@ const AddPublicationDialog: React.FC<AddPublicationDialogProps> = ({
             selectedPublication={null}
             handleInputChange={handleInputChange}
             handleAbstractChange={handleAbstractChange}
+            handleImageUpload={handleImageUpload}
             handleSubmit={handleSubmit}
             resetForm={resetForm}
           />

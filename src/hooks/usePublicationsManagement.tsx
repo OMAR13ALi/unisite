@@ -18,6 +18,7 @@ export interface PublicationFormData {
   doi: string;
   abstract: string;
   pdf_url: string;
+  cover_image_url?: string;
 }
 
 export const usePublicationsManagement = () => {
@@ -31,7 +32,8 @@ export const usePublicationsManagement = () => {
     date: '',
     doi: '',
     abstract: '',
-    pdf_url: ''
+    pdf_url: '',
+    cover_image_url: ''
   });
 
   // React Query for fetching publications
@@ -91,6 +93,11 @@ export const usePublicationsManagement = () => {
   const handleAbstractChange = (content: string) => {
     setFormData(prev => ({ ...prev, abstract: content }));
   };
+  
+  // Handle image upload
+  const handleImageUpload = (url: string) => {
+    setFormData(prev => ({ ...prev, cover_image_url: url }));
+  };
 
   // Handle form submission
   const handleSubmit = (e: React.FormEvent) => {
@@ -111,7 +118,8 @@ export const usePublicationsManagement = () => {
       date: '',
       doi: '',
       abstract: '',
-      pdf_url: ''
+      pdf_url: '',
+      cover_image_url: ''
     });
     setSelectedPublication(null);
   };
@@ -126,7 +134,8 @@ export const usePublicationsManagement = () => {
       date: publication.date,
       doi: publication.doi || '',
       abstract: publication.abstract,
-      pdf_url: publication.pdf_url || ''
+      pdf_url: publication.pdf_url || '',
+      cover_image_url: publication.cover_image_url || ''
     });
     setIsEditDialogOpen(true);
   };
@@ -147,6 +156,7 @@ export const usePublicationsManagement = () => {
     setIsEditDialogOpen,
     handleInputChange,
     handleAbstractChange,
+    handleImageUpload,
     handleSubmit,
     resetForm,
     handleEditClick,
