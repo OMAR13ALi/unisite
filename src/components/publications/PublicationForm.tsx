@@ -9,6 +9,7 @@ import {
 } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Publication } from '@/services/publicationsService';
+import ImageUploader from '@/components/ui/ImageUploader';
 
 interface PublicationFormProps {
   formData: {
@@ -19,10 +20,12 @@ interface PublicationFormProps {
     doi: string;
     abstract: string;
     pdf_url: string;
+    cover_image_url?: string;
   };
   selectedPublication: Publication | null;
   handleInputChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
   handleAbstractChange: (content: string) => void;
+  handleImageUpload: (url: string) => void;
   handleSubmit: (e: React.FormEvent) => void;
   resetForm: () => void;
 }
@@ -32,6 +35,7 @@ const PublicationForm: React.FC<PublicationFormProps> = ({
   selectedPublication,
   handleInputChange,
   handleAbstractChange,
+  handleImageUpload,
   handleSubmit,
   resetForm
 }) => {
@@ -40,6 +44,16 @@ const PublicationForm: React.FC<PublicationFormProps> = ({
       <div className="flex-grow overflow-auto">
         <ScrollArea className="h-[50vh]">
           <div className="space-y-4 py-4 px-1">
+            <div className="space-y-2">
+              <label htmlFor="cover_image" className="text-sm font-medium">Cover Image (Optional)</label>
+              <ImageUploader 
+                initialImageUrl={formData.cover_image_url} 
+                onImageUploaded={handleImageUpload}
+                bucket="publication-images"
+                folder="covers"
+              />
+            </div>
+            
             <div className="space-y-2">
               <label htmlFor="title" className="text-sm font-medium">Title</label>
               <Input

@@ -31,7 +31,8 @@ const ResearchManagement = () => {
     title: '',
     description: '',
     category: '',
-    status: 'active'
+    status: 'active',
+    cover_image_url: ''
   });
 
   // React Query for fetching research projects
@@ -91,6 +92,11 @@ const ResearchManagement = () => {
   const handleDescriptionChange = (content: string) => {
     setFormData(prev => ({ ...prev, description: content }));
   };
+  
+  // Handle image upload
+  const handleImageUpload = (url: string) => {
+    setFormData(prev => ({ ...prev, cover_image_url: url }));
+  };
 
   // Handle form submission
   const handleSubmit = (e: React.FormEvent) => {
@@ -108,7 +114,8 @@ const ResearchManagement = () => {
       title: '',
       description: '',
       category: '',
-      status: 'active'
+      status: 'active',
+      cover_image_url: ''
     });
     setSelectedProject(null);
   };
@@ -120,7 +127,8 @@ const ResearchManagement = () => {
       title: project.title,
       description: project.description,
       category: project.category,
-      status: project.status
+      status: project.status,
+      cover_image_url: project.cover_image_url || ''
     });
     setIsEditDialogOpen(true);
   };
@@ -157,6 +165,7 @@ const ResearchManagement = () => {
                 selectedProject={null}
                 handleInputChange={handleInputChange}
                 handleDescriptionChange={handleDescriptionChange}
+                handleImageUpload={handleImageUpload}
                 handleSubmit={handleSubmit}
                 resetForm={resetForm}
               />
@@ -177,6 +186,7 @@ const ResearchManagement = () => {
               selectedProject={selectedProject}
               handleInputChange={handleInputChange}
               handleDescriptionChange={handleDescriptionChange}
+              handleImageUpload={handleImageUpload}
               handleSubmit={handleSubmit}
               resetForm={() => setIsEditDialogOpen(false)}
             />

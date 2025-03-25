@@ -29,6 +29,7 @@ import MaterialsView, { Material } from '@/components/teaching/MaterialsView';
 import * as teachingService from '@/services/teachingService';
 
 const TeachingManagement = () => {
+  // ... keep existing code (variables and state declarations)
   const { isAdmin } = useAuth();
   const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState('courses');
@@ -41,7 +42,8 @@ const TeachingManagement = () => {
     description: '',
     semester: 'Fall',
     year: new Date().getFullYear().toString(),
-    status: 'active'
+    status: 'active',
+    cover_image_url: ''
   });
   const [materialFormData, setMaterialFormData] = useState({
     title: '',
@@ -178,6 +180,11 @@ const TeachingManagement = () => {
     const { name, value } = e.target;
     setMaterialFormData(prev => ({ ...prev, [name]: value }));
   };
+  
+  // Handle image upload
+  const handleImageUpload = (url: string) => {
+    setCourseFormData(prev => ({ ...prev, cover_image_url: url }));
+  };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -233,7 +240,8 @@ const TeachingManagement = () => {
       description: '',
       semester: 'Fall',
       year: new Date().getFullYear().toString(),
-      status: 'active'
+      status: 'active',
+      cover_image_url: ''
     });
     setSelectedCourse(null);
   };
@@ -257,7 +265,8 @@ const TeachingManagement = () => {
       description: course.description,
       semester: course.semester,
       year: course.year,
-      status: course.status
+      status: course.status,
+      cover_image_url: course.cover_image_url || ''
     });
     setIsEditCourseDialogOpen(true);
   };
@@ -307,6 +316,7 @@ const TeachingManagement = () => {
               <CourseForm 
                 formData={courseFormData}
                 handleInputChange={handleCourseInputChange}
+                handleImageUpload={handleImageUpload}
                 handleSubmit={handleCourseSubmit}
                 resetForm={resetCourseForm}
                 isEditing={false}
@@ -360,6 +370,7 @@ const TeachingManagement = () => {
           <CourseForm 
             formData={courseFormData}
             handleInputChange={handleCourseInputChange}
+            handleImageUpload={handleImageUpload}
             handleSubmit={handleCourseSubmit}
             resetForm={() => setIsEditCourseDialogOpen(false)}
             isEditing={true}

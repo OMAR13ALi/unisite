@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { DialogFooter, DialogClose } from '@/components/ui/dialog';
+import ImageUploader from '@/components/ui/ImageUploader';
 
 interface CourseFormProps {
   formData: {
@@ -13,8 +14,10 @@ interface CourseFormProps {
     semester: string;
     year: string;
     status: string;
+    cover_image_url?: string;
   };
   handleInputChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => void;
+  handleImageUpload: (url: string) => void;
   handleSubmit: (e: React.FormEvent) => void;
   resetForm: () => void;
   isEditing: boolean;
@@ -23,12 +26,23 @@ interface CourseFormProps {
 const CourseForm: React.FC<CourseFormProps> = ({
   formData,
   handleInputChange,
+  handleImageUpload,
   handleSubmit,
   resetForm,
   isEditing
 }) => {
   return (
     <form onSubmit={handleSubmit} className="space-y-4 py-4">
+      <div className="space-y-2">
+        <label htmlFor="cover_image" className="text-sm font-medium">Cover Image (Optional)</label>
+        <ImageUploader 
+          initialImageUrl={formData.cover_image_url} 
+          onImageUploaded={handleImageUpload}
+          bucket="course-images"
+          folder="covers"
+        />
+      </div>
+      
       <div className="space-y-2">
         <label htmlFor="title" className="text-sm font-medium">Course Title</label>
         <Input

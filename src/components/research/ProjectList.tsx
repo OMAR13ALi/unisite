@@ -10,7 +10,7 @@ import {
   TableRow 
 } from '@/components/ui/table';
 import { ResearchProject } from '@/services/researchService';
-import { Pencil, Trash, CheckCircle, XCircle } from 'lucide-react';
+import { Pencil, Trash, CheckCircle, XCircle, ImageIcon } from 'lucide-react';
 
 interface ProjectListProps {
   projects: ResearchProject[];
@@ -46,6 +46,7 @@ const ProjectList: React.FC<ProjectListProps> = ({
     <Table>
       <TableHeader>
         <TableRow>
+          <TableHead>Cover Image</TableHead>
           <TableHead>Title</TableHead>
           <TableHead>Category</TableHead>
           <TableHead>Status</TableHead>
@@ -55,6 +56,19 @@ const ProjectList: React.FC<ProjectListProps> = ({
       <TableBody>
         {projects.map((project) => (
           <TableRow key={project.id}>
+            <TableCell>
+              {project.cover_image_url ? (
+                <img 
+                  src={project.cover_image_url} 
+                  alt={project.title} 
+                  className="w-12 h-12 object-cover rounded"
+                />
+              ) : (
+                <div className="w-12 h-12 bg-muted rounded flex items-center justify-center">
+                  <ImageIcon size={16} className="text-muted-foreground" />
+                </div>
+              )}
+            </TableCell>
             <TableCell className="font-medium">{project.title}</TableCell>
             <TableCell>{project.category}</TableCell>
             <TableCell>

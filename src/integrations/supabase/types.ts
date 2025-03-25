@@ -53,6 +53,7 @@ export type Database = {
       courses: {
         Row: {
           code: string
+          cover_image_url: string | null
           created_at: string
           description: string
           highlights: string[] | null
@@ -65,6 +66,7 @@ export type Database = {
         }
         Insert: {
           code: string
+          cover_image_url?: string | null
           created_at?: string
           description: string
           highlights?: string[] | null
@@ -77,6 +79,7 @@ export type Database = {
         }
         Update: {
           code?: string
+          cover_image_url?: string | null
           created_at?: string
           description?: string
           highlights?: string[] | null
@@ -177,6 +180,7 @@ export type Database = {
         Row: {
           abstract: string
           authors: string[]
+          cover_image_url: string | null
           created_at: string
           date: string
           doi: string | null
@@ -189,6 +193,7 @@ export type Database = {
         Insert: {
           abstract: string
           authors: string[]
+          cover_image_url?: string | null
           created_at?: string
           date: string
           doi?: string | null
@@ -201,6 +206,7 @@ export type Database = {
         Update: {
           abstract?: string
           authors?: string[]
+          cover_image_url?: string | null
           created_at?: string
           date?: string
           doi?: string | null
@@ -215,6 +221,7 @@ export type Database = {
       research_projects: {
         Row: {
           category: string
+          cover_image_url: string | null
           created_at: string
           description: string
           id: string
@@ -225,6 +232,7 @@ export type Database = {
         }
         Insert: {
           category: string
+          cover_image_url?: string | null
           created_at?: string
           description: string
           id?: string
@@ -235,6 +243,7 @@ export type Database = {
         }
         Update: {
           category?: string
+          cover_image_url?: string | null
           created_at?: string
           description?: string
           id?: string

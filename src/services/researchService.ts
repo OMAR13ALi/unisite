@@ -8,6 +8,7 @@ export interface ResearchProject {
   category: string;
   status: string;
   created_at: string;
+  cover_image_url?: string;
 }
 
 // Fetch research projects

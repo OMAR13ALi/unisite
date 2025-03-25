@@ -11,6 +11,7 @@ export interface Publication {
   doi?: string;
   pdf?: string;
   abstract?: string;
+  cover_image_url?: string;
 }
 
 interface PublicationCardProps {
@@ -24,7 +25,7 @@ const PublicationCard: React.FC<PublicationCardProps> = ({
   isExpanded = false,
   onToggleExpand
 }) => {
-  const { title, authors, venue, date, doi, pdf, abstract } = publication;
+  const { title, authors, venue, date, doi, pdf, abstract, cover_image_url } = publication;
   
   // Format authors (display all authors and highlight the professor)
   const formattedAuthors = authors.map((author, index) => {
@@ -41,6 +42,15 @@ const PublicationCard: React.FC<PublicationCardProps> = ({
   return (
     <div className="group mb-6 p-6 border rounded-md bg-white transition-all duration-300 hover:shadow-sm">
       <div className="flex flex-col">
+        {cover_image_url && (
+          <div className="mb-4 -m-6 p-0">
+            <img 
+              src={cover_image_url} 
+              alt={title} 
+              className="w-full h-48 object-cover rounded-t-md" 
+            />
+          </div>
+        )}
         <div className="mb-2">
           <button 
             onClick={onToggleExpand}

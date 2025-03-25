@@ -9,7 +9,7 @@ import {
   TableHeader, 
   TableRow 
 } from '@/components/ui/table';
-import { Pencil, Trash, ExternalLink } from 'lucide-react';
+import { Pencil, Trash, ExternalLink, ImageIcon } from 'lucide-react';
 import { Publication } from '@/services/publicationsService';
 
 interface PublicationListProps {
@@ -46,6 +46,7 @@ const PublicationList: React.FC<PublicationListProps> = ({
     <Table>
       <TableHeader>
         <TableRow>
+          <TableHead>Cover</TableHead>
           <TableHead>Title</TableHead>
           <TableHead>Authors</TableHead>
           <TableHead>Venue</TableHead>
@@ -56,6 +57,19 @@ const PublicationList: React.FC<PublicationListProps> = ({
       <TableBody>
         {publications.map((publication) => (
           <TableRow key={publication.id}>
+            <TableCell>
+              {publication.cover_image_url ? (
+                <img 
+                  src={publication.cover_image_url} 
+                  alt={publication.title} 
+                  className="w-12 h-12 object-cover rounded"
+                />
+              ) : (
+                <div className="w-12 h-12 bg-muted rounded flex items-center justify-center">
+                  <ImageIcon size={16} className="text-muted-foreground" />
+                </div>
+              )}
+            </TableCell>
             <TableCell className="font-medium">{publication.title}</TableCell>
             <TableCell>{publication.authors.join(', ')}</TableCell>
             <TableCell>{publication.venue}</TableCell>

@@ -9,6 +9,7 @@ import {
 } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { ResearchProject } from '@/services/researchService';
+import ImageUploader from '@/components/ui/ImageUploader';
 
 interface ProjectFormProps {
   formData: {
@@ -16,10 +17,12 @@ interface ProjectFormProps {
     description: string;
     category: string;
     status: string;
+    cover_image_url?: string;
   };
   selectedProject: ResearchProject | null;
   handleInputChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => void;
   handleDescriptionChange: (content: string) => void;
+  handleImageUpload: (url: string) => void;
   handleSubmit: (e: React.FormEvent) => void;
   resetForm: () => void;
 }
@@ -29,6 +32,7 @@ const ProjectForm: React.FC<ProjectFormProps> = ({
   selectedProject,
   handleInputChange,
   handleDescriptionChange,
+  handleImageUpload,
   handleSubmit,
   resetForm
 }) => {
@@ -37,6 +41,16 @@ const ProjectForm: React.FC<ProjectFormProps> = ({
       <div className="flex-grow overflow-auto">
         <ScrollArea className="h-[50vh]">
           <div className="space-y-4 py-4 px-1">
+            <div className="space-y-2">
+              <label htmlFor="cover_image" className="text-sm font-medium">Cover Image (Optional)</label>
+              <ImageUploader 
+                initialImageUrl={formData.cover_image_url} 
+                onImageUploaded={handleImageUpload}
+                bucket="research-images"
+                folder="covers"
+              />
+            </div>
+            
             <div className="space-y-2">
               <label htmlFor="title" className="text-sm font-medium">Title</label>
               <Input

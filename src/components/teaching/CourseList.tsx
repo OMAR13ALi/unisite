@@ -19,6 +19,7 @@ export interface Course {
   year: string;
   status: string;
   created_at: string;
+  cover_image_url?: string;
 }
 
 interface CourseListProps {
@@ -58,7 +59,16 @@ const CourseList: React.FC<CourseListProps> = ({
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
       {courses.map((course) => (
         <Card key={course.id} className="overflow-hidden">
-          <CardHeader className="bg-accent/30 pb-2">
+          {course.cover_image_url && (
+            <div className="h-48 w-full overflow-hidden">
+              <img 
+                src={course.cover_image_url} 
+                alt={course.title} 
+                className="w-full h-full object-cover"
+              />
+            </div>
+          )}
+          <CardHeader className={`${course.cover_image_url ? '' : 'bg-accent/30'} pb-2`}>
             <div className="flex justify-between items-start">
               <CardTitle className="text-lg">{course.code}</CardTitle>
               <span className={`text-xs px-2 py-1 rounded-full ${

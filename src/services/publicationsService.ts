@@ -10,6 +10,7 @@ export interface Publication {
   doi?: string;
   abstract: string;
   pdf_url?: string;
+  cover_image_url?: string;
   created_at: string;
 }
 
