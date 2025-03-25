@@ -42,14 +42,6 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
     try {
       setIsUploading(true);
       
-      // Check if bucket exists, if not, create it
-      const { data: bucketExists } = await supabase.storage.getBucket(bucket);
-      if (!bucketExists) {
-        await supabase.storage.createBucket(bucket, {
-          public: true
-        });
-      }
-      
       const filePath = `${folder}/${generateUniqueFileName(file.name)}`;
       
       const { error: uploadError } = await supabase.storage
