@@ -7,7 +7,7 @@ import { Material } from '@/components/teaching/MaterialsView';
 export const fetchCourses = async (): Promise<Course[]> => {
   const { data, error } = await supabase
     .from('courses')
-    .select('*')
+    .select('id, title, code, description, semester, year, status, cover_image_url, created_at')
     .order('year', { ascending: false })
     .order('semester', { ascending: false });
   

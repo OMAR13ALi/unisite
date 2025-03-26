@@ -30,19 +30,23 @@ const RecentPublications: React.FC<RecentPublicationsProps> = ({ publications })
           {publications.map((pub, index) => (
             <div 
               key={index} 
-              className="overflow-hidden border rounded-md bg-white animate-slide-up shadow-sm"
+              className="overflow-hidden border rounded-md bg-white animate-slide-up shadow-sm flex flex-col md:flex-row"
               style={{ animationDelay: pub.delay }}
             >
-              {pub.cover_image_url && (
-                <div className="h-40 w-full">
+              {pub.cover_image_url ? (
+                <div className="h-40 md:w-1/3 w-full">
                   <img 
                     src={pub.cover_image_url} 
                     alt={pub.title} 
                     className="w-full h-full object-cover"
                   />
                 </div>
+              ) : (
+                <div className="h-40 md:w-1/3 w-full bg-gradient-to-r from-primary/5 to-secondary/5 flex items-center justify-center">
+                  <span className="text-xl font-serif font-medium text-primary/30">Publication</span>
+                </div>
               )}
-              <div className="p-6">
+              <div className="p-6 md:w-2/3 w-full">
                 <h3 className="text-xl font-semibold font-serif mb-2">{pub.title}</h3>
                 <p className="text-muted-foreground mb-2">{pub.authors}</p>
                 <div className="text-sm text-muted-foreground">

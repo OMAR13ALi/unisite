@@ -26,10 +26,10 @@ const ResearchHighlights: React.FC<ResearchHighlightsProps> = ({ researchAreas }
           {researchAreas.map((item, index) => (
             <div 
               key={index}
-              className="bg-white rounded-lg border overflow-hidden animate-slide-up shadow-sm"
+              className="bg-white rounded-lg border overflow-hidden animate-slide-up shadow-sm h-full flex flex-col"
               style={{ animationDelay: item.delay }}
             >
-              {item.cover_image_url && (
+              {item.cover_image_url ? (
                 <div className="h-40 w-full overflow-hidden">
                   <img 
                     src={item.cover_image_url} 
@@ -37,13 +37,17 @@ const ResearchHighlights: React.FC<ResearchHighlightsProps> = ({ researchAreas }
                     className="w-full h-full object-cover" 
                   />
                 </div>
+              ) : (
+                <div className="h-40 w-full bg-gradient-to-r from-primary/10 to-secondary/10 flex items-center justify-center">
+                  <span className="text-xl font-serif font-medium text-primary/40">Research</span>
+                </div>
               )}
-              <div className="p-6">
+              <div className="p-6 flex-1 flex flex-col">
                 <h3 className="text-xl font-serif font-medium mb-4">{item.title}</h3>
-                <p className="text-muted-foreground mb-6">{item.description}</p>
+                <p className="text-muted-foreground mb-6 flex-1">{item.description}</p>
                 <Link 
                   to="/research" 
-                  className="text-primary hover-underline-animation inline-flex items-center gap-1"
+                  className="text-primary hover-underline-animation inline-flex items-center gap-1 mt-auto"
                 >
                   <span>Learn more</span>
                   <ArrowRight size={16} />

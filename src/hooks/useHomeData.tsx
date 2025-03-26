@@ -38,7 +38,7 @@ export const fetchRecentPublications = async () => {
 export const fetchActiveCourses = async () => {
   const { data, error } = await supabase
     .from('courses')
-    .select('*')
+    .select('id, title, code, description, semester, year, status, cover_image_url')
     .eq('status', 'active')
     .order('code', { ascending: true })
     .limit(3);
@@ -56,7 +56,7 @@ export const fetchActiveCourses = async () => {
 export const fetchResearchHighlights = async () => {
   const { data, error } = await supabase
     .from('research_projects')
-    .select('*')
+    .select('id, title, description, category, status, cover_image_url')
     .eq('status', 'active')
     .order('created_at', { ascending: false })
     .limit(3);
