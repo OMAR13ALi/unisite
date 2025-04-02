@@ -15,7 +15,7 @@ interface HeroProps {
 
 const Hero: React.FC<HeroProps> = ({ professor }) => {
   return (
-    <section className="relative h-[90vh] flex items-center">
+    <section className="relative min-h-[70vh] flex items-center py-12">
       <div 
         className="absolute inset-0 z-0 bg-gradient-to-b from-secondary/40 to-transparent" 
         aria-hidden="true"
@@ -52,12 +52,12 @@ const Hero: React.FC<HeroProps> = ({ professor }) => {
             </div>
           </div>
           <div className="order-1 md:order-2 flex justify-center md:justify-end animate-slide-up" style={{ animationDelay: '0.4s' }}>
-            <div className="relative">
+            <div className="relative w-3/4 md:w-2/3">
               <div className="absolute -inset-1 bg-gradient-to-tr from-primary/20 to-secondary/40 rounded-2xl blur-md"></div>
               <img 
                 src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=774&q=80" 
                 alt={professor ? `Professor ${professor.first_name} ${professor.last_name}` : "Professor John Smith"} 
-                className="w-full max-w-md rounded-xl object-cover relative z-10"
+                className="w-full rounded-xl object-cover relative z-10"
               />
             </div>
           </div>
