@@ -129,7 +129,12 @@ export default {
 						opacity: '1',
 						transform: 'translateY(0)'
 					}
-				}
+				},
+        'carousel-fade': {
+          '0%, 33%': { opacity: 0 },
+          '33.3%, 66.6%': { opacity: 1 },
+          '100%': { opacity: 0 },
+        }
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
@@ -137,8 +142,15 @@ export default {
 				'fade-in': 'fade-in 0.5s ease-out forwards',
 				'fade-out': 'fade-out 0.5s ease-out forwards',
 				'slide-up': 'slide-up 0.6s ease-out forwards',
-				'slide-down': 'slide-down 0.6s ease-out forwards'
-			}
+				'slide-down': 'slide-down 0.6s ease-out forwards',
+        'carousel-fade': 'carousel-fade 12s infinite',
+			},
+      backgroundImage: {
+        'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
+      },
+      dropShadow: {
+        'text': '0 2px 4px rgba(0, 0, 0, 0.3)',
+      }
 		}
 	},
 	plugins: [require("tailwindcss-animate")],

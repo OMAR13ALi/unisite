@@ -5,6 +5,7 @@ import { useHomeData, stripHtml } from '@/hooks/useHomeData';
 
 // Import the new component files
 import Hero from '@/components/home/Hero';
+import ImageCarousel from '@/components/home/ImageCarousel';
 import ResearchHighlights from '@/components/home/ResearchHighlights';
 import RecentPublications from '@/components/home/RecentPublications';
 import CurrentCourses from '@/components/home/CurrentCourses';
@@ -13,6 +14,14 @@ import ContactCTA from '@/components/home/ContactCTA';
 const Home = () => {
   // Use our custom hook to fetch all data
   const { professor, publications, courses, researchProjects } = useHomeData();
+
+  // Sample images for the carousel
+  const carouselImages = [
+    "https://images.unsplash.com/photo-1606761568499-6d2451b23c66?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1974&q=80",
+    "https://images.unsplash.com/photo-1587620962725-abab7fe55159?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1931&q=80",
+    "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
+    "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1171&q=80"
+  ];
 
   // Format research areas for display
   const researchAreas = researchProjects.length > 0 
@@ -122,11 +131,18 @@ const Home = () => {
         {/* Hero Section */}
         <Hero professor={professor} />
 
+        {/* New Image Carousel Section */}
+        <ImageCarousel images={carouselImages} />
+        
         {/* Research Highlights */}
-        <ResearchHighlights researchAreas={researchAreas} />
+        <div id="research">
+          <ResearchHighlights researchAreas={researchAreas} />
+        </div>
 
         {/* Recent Publications */}
-        <RecentPublications publications={recentPublications} />
+        <div id="publications">
+          <RecentPublications publications={recentPublications} />
+        </div>
 
         {/* Teaching */}
         <CurrentCourses courses={displayCourses} />
