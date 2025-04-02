@@ -128,11 +128,11 @@ const Home = () => {
   return (
     <PageTransition>
       <div className="pt-20">
-        {/* Hero Section */}
-        <Hero professor={professor} />
-
-        {/* New Image Carousel Section */}
+        {/* Image Carousel Section - now placed first */}
         <ImageCarousel images={carouselImages} />
+        
+        {/* Hero Section - now placed second */}
+        <Hero professor={professor} />
         
         {/* Research Highlights */}
         <div id="research">
