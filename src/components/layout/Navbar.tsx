@@ -48,7 +48,7 @@ const Navbar: React.FC = () => {
             to="/" 
             className="text-xl md:text-2xl font-serif font-medium tracking-tight"
           >
-            Prof. Smith
+            Prof. Faouzi Nahali
           </Link>
           
           {/* Desktop Navigation */}

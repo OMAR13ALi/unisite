@@ -9,10 +9,10 @@ const Footer: React.FC = () => {
       <div className="container mx-auto px-4 py-8 md:py-12">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div>
-            <h3 className="text-lg font-semibold mb-4 font-serif">Prof. Smith</h3>
+            <h3 className="text-lg font-semibold mb-4 font-serif">Prof. Nahali</h3>
             <p className="text-muted-foreground">
-              Professor of Computer Science<br />
-              University of Technology
+              technologue Génie électrique<br />
+              ISET Gabès
             </p>
           </div>
           
@@ -60,7 +60,7 @@ const Footer: React.FC = () => {
               </a>
             </div>
             <p className="text-muted-foreground text-sm">
-              © {new Date().getFullYear()} Prof. Smith.<br />
+              © {new Date().getFullYear()} Prof. Nahali.<br />
               All rights reserved.
             </p>
           </div>

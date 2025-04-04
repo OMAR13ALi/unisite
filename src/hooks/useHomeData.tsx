@@ -13,9 +13,9 @@ export const fetchProfessorProfile = async () => {
   if (error) {
     console.error('Error fetching professor profile:', error);
     return {
-      first_name: 'John',
-      last_name: 'Smith',
-      title: 'Professor of Computer Science'
+      first_name: 'Faouzi',
+      last_name: 'Nahali',
+      title: 'technologue Génie électrique '
     };
   }
   

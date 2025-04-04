@@ -1,40 +1,38 @@
-
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&display=swap');
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
-    /* Warm, Professional Color Palette */
-    --background: 36 33% 97%; /* #f7f5f2 - Light Sand */
-    --foreground: 25 32% 16%; /* #3c2f1e - Deep Espresso */
+    /* More Colorful Yet Professional Palette */
+    --background: 210 50% 98%; /* #f5f9fd - Cool Light Blue */
+    --foreground: 215 35% 20%; /* #233246 - Deep Navy */
 
-    --card: 36 33% 97%;
-    --card-foreground: 25 32% 16%;
+    --card: 210 50% 98%;
+    --card-foreground: 215 35% 20%;
 
-    --popover: 36 33% 97%;
-    --popover-foreground: 25 32% 16%;
+    --popover: 210 50% 98%;
+    --popover-foreground: 215 35% 20%;
 
-    --primary: 18 42% 55%; /* #c06e52 - Terracotta */
-    --primary-foreground: 36 33% 97%;
+    --primary: 350 65% 50%; /* #d92e5e - Vibrant Crimson */
+    --primary-foreground: 210 50% 98%;
 
-    --secondary: 43 23% 55%; /* #a19161 - Warm Taupe */
-    --secondary-foreground: 36 33% 97%;
+    --secondary: 200 75% 45%; /* #1a91d1 - Bold Azure */
+    --secondary-foreground: 210 50% 98%;
 
-    --muted: 28 20% 92%; /* #ece8e2 - Soft Beige */
-    --muted-foreground: 25 20% 40%;
+    --muted: 210 30% 92%; /* #e6edf5 - Soft Blue Gray */
+    --muted-foreground: 215 25% 40%;
 
-    --accent: 27 65% 70%; /* #e9b471 - Golden Honey */
-    --accent-foreground: 25 32% 16%;
+    --accent: 200 40% 60%; /* #5c9fc2 - Soft Blue */
+            /*--accent: 275 60% 60%;*/ /* #9b4dca - Rich Purple */
+    --accent-foreground: 210 50% 98%;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 36 33% 97%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 210 50% 98%;
 
-    --border: 25 25% 85%;
-    --input: 25 25% 85%;
-    --ring: 18 42% 55%;
+    --border: 215 20% 85%;
+    --input: 215 20% 85%;
+    --ring: 350 65% 50%;
 
     --radius: 0.5rem;
   }
@@ -44,70 +42,100 @@
   }
 
   body {
-    @apply bg-background text-foreground font-sans;
+    @apply bg-background text-foreground;
     overflow-x: hidden;
   }
 
   /* Typography */
-  h1, h2, h3, h4, h5, h6 {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
     @apply font-serif tracking-tight;
   }
-  
+
   h1 {
     @apply text-4xl md:text-5xl lg:text-6xl font-medium;
   }
-  
+
   h2 {
     @apply text-3xl md:text-4xl font-medium;
   }
-  
+
   h3 {
     @apply text-2xl md:text-3xl font-medium;
   }
-  
+
   p {
     @apply leading-relaxed text-base md:text-lg;
   }
-  
-  /* Links */
+}
+
+/* Links with underline animation */
+@layer components {
   .hover-underline-animation {
-    @apply relative inline-block;
+    position: relative;
+    display: inline-block;
   }
-  
+
   .hover-underline-animation::after {
-    @apply content-[''] absolute w-full scale-x-0 h-[1px] bottom-0 left-0 bg-primary origin-bottom-right transition-transform duration-300;
+    content: "";
+    position: absolute;
+    width: 100%;
+    transform: scaleX(0);
+    height: 1px;
+    bottom: 0;
+    left: 0;
+    background-color: hsl(var(--primary));
+    transform-origin: bottom right;
+    transition: transform 0.3s ease-out;
   }
-  
+
   .hover-underline-animation:hover::after {
-    @apply scale-x-100 origin-bottom-left;
+    transform: scaleX(1);
+    transform-origin: bottom left;
   }
-  
+
   /* Content sections */
   .section {
     @apply py-12 md:py-20;
   }
-  
+
   /* Page transitions */
   .page-enter {
-    @apply opacity-0;
-  }
-  
-  .page-enter-active {
-    @apply opacity-100 transition-opacity duration-300;
-  }
-  
-  .page-exit {
-    @apply opacity-100;
-  }
-  
-  .page-exit-active {
-    @apply opacity-0 transition-opacity duration-300;
+    opacity: 0;
   }
 
-  /* Image carousel animations */
-  @keyframes fade {
-    0%, 20% { opacity: 0; }
-    25%, 45% { opacity: 1; }
-    50%, 100% { opacity: 0; }
+  .page-enter-active {
+    opacity: 1;
+    transition: opacity 0.3s;
+  }
+
+  .page-exit {
+    opacity: 1;
+  }
+
+  .page-exit-active {
+    opacity: 0;
+    transition: opacity 0.3s;
   }
 }
+
+/* Image carousel animations */
+@keyframes fade {
+  0%,
+  20% {
+    opacity: 0;
+  }
+  25%,
+  45% {
+    opacity: 1;
+  }
+  50%,
+  100% {
+    opacity: 0;
+  }
+}
+

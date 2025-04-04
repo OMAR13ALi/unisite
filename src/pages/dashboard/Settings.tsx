@@ -32,9 +32,9 @@ const fetchSiteSettings = async (): Promise<SiteSettings> => {
       // Default values if table doesn't exist or is empty
       return {
         id: null,
-        site_title: "Prof. Smith",
+        site_title: "Prof. Nahali",
         site_description: "Academic Website",
-        footer_text: "© 2025 Prof. Smith. All rights reserved."
+        footer_text: "© 2025 Prof. Nahali. All rights reserved."
       };
     }
     
@@ -43,9 +43,9 @@ const fetchSiteSettings = async (): Promise<SiteSettings> => {
       const { data: newData, error: insertError } = await supabase
         .from('site_settings')
         .insert({
-          site_title: "Prof. Smith",
+          site_title: "Prof. Nahali",
           site_description: "Academic Website",
-          footer_text: "© 2025 Prof. Smith. All rights reserved."
+          footer_text: "© 2025 Prof. Nahali. All rights reserved."
         })
         .select('*')
         .single();
@@ -54,9 +54,9 @@ const fetchSiteSettings = async (): Promise<SiteSettings> => {
         console.error('Error creating site settings:', insertError);
         return {
           id: null,
-          site_title: "Prof. Smith",
+          site_title: "Prof. Nahali",
           site_description: "Academic Website",
-          footer_text: "© 2025 Prof. Smith. All rights reserved."
+          footer_text: "© 2025 Prof. Nahali. All rights reserved."
         };
       }
       
@@ -68,9 +68,9 @@ const fetchSiteSettings = async (): Promise<SiteSettings> => {
     console.error('Unexpected error in fetchSiteSettings:', error);
     return {
       id: null,
-      site_title: "Prof. Smith",
+      site_title: "Prof. Nahali",
       site_description: "Academic Website",
-      footer_text: "© 2025 Prof. Smith. All rights reserved."
+      footer_text: "© 2025 Prof. Nahali. All rights reserved."
     };
   }
 };
@@ -93,9 +93,9 @@ const Settings = () => {
   // Update state when settings are loaded
   useEffect(() => {
     if (settings) {
-      setSiteTitle(settings.site_title || "Prof. Smith");
+      setSiteTitle(settings.site_title || "Prof. Nahlai");
       setSiteDescription(settings.site_description || "Academic Website");
-      setFooterText(settings.footer_text || "© 2025 Prof. Smith. All rights reserved.");
+      setFooterText(settings.footer_text || "© 2025 Prof. Nahali. All rights reserved.");
     }
   }, [settings]);
   
