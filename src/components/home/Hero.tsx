@@ -54,8 +54,8 @@ const Hero: React.FC<HeroProps> = ({ professor }) => {
             <div className="relative w-3/4 md:w-2/3">
               <div className="absolute -inset-1 bg-gradient-to-tr from-primary/20 to-secondary/40 rounded-2xl blur-md"></div>
               <img 
-                // src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=774&q=80" 
-                src="/faouzi.jpg"
+                src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=774&q=80" 
+                //src="/faouzi.jpg"
                 alt={professor ? `Professor ${professor.first_name} ${professor.last_name}` : "Professor Faouzi Nahali"} 
                 className="w-full rounded-xl object-cover relative z-10"
               />
